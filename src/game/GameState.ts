@@ -1,4 +1,5 @@
 import { Vector3 } from 'three';
+import { Radians, HexColor } from '../types';
 
 export enum ItemType {
   KEY_GOLD = 'KEY_GOLD',
@@ -13,7 +14,7 @@ export enum ItemType {
 export interface InventoryItem {
   type: ItemType;
   name: string;
-  color: number;
+  color: HexColor;
 }
 
 export interface GateInfo {
@@ -27,25 +28,39 @@ export interface POI {
   id: string;
   type: 'dragon' | 'item' | 'wall' | 'gate';
   pos: Vector3;
-  color: number;
+  color: HexColor;
 }
 
 export interface GameStateData {
   playerPos: Vector3;
-  playerRotation: number;
+  playerRotation: Radians;
   inventory: InventoryItem[];
   activeIndex: number;
   isDead: boolean;
+  isPaused: boolean;
+  isInitialized: boolean;
   hasWon: boolean;
+  currentZone: 'LANDING' | 'SECTOR';
   worldSeed: number;
   pois: POI[];
   gates: GateInfo[];
+  audio: {
+    isMuted: boolean;
+    isRadarMuted: boolean;
+  };
+  hud: {
+    showMinimap: boolean;
+    showStatus: boolean;
+    showInventory: boolean;
+    showControls: boolean;
+  };
   debug: {
     fps: number;
     gpu: string;
     drawCalls: number;
     triangles: number;
     objectCount: number;
+    showPhysics: boolean;
   };
 }
 
@@ -57,16 +72,30 @@ export const GameState: GameStateData = {
   ],
   activeIndex: 0,
   isDead: false,
+  isPaused: false,
+  isInitialized: false,
   hasWon: false,
+  currentZone: 'LANDING',
   worldSeed: Math.random(),
   pois: [],
   gates: [],
+  audio: {
+    isMuted: false,
+    isRadarMuted: false,
+  },
+  hud: {
+    showMinimap: true,
+    showStatus: true,
+    showInventory: true,
+    showControls: true,
+  },
   debug: {
     fps: 0,
     gpu: 'Identifying...',
     drawCalls: 0,
     triangles: 0,
     objectCount: 0,
+    showPhysics: false,
   },
 };
 

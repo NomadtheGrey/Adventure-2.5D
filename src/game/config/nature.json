@@ -1,0 +1,37 @@
+{
+  "natureTypes": {
+    "tree": {
+      "strategy": "instanced",
+      "geometry": { "type": "cone", "radius": 3, "height": 8, "radialSegments": 4 },
+      "material": { "color": 3037735 },
+      "collision": { "width": 4, "height": 8, "depth": 4 }
+    },
+    "bush": {
+      "strategy": "instanced",
+      "geometry": { "type": "icosahedron", "radius": 2.5, "detail": 0 },
+      "material": { "color": 1723706 },
+      "collision": { "width": 4, "height": 4, "depth": 4 }
+    },
+    "water": {
+      "strategy": "static",
+      "geometry": { "type": "box", "height": 0.5 },
+      "material": { "color": 1947877, "transparent": true, "opacity": 0.6 }
+    }
+  },
+  "roomTemplates": [
+    { "id": 0, "elements": [{ "type": "water", "w": 25, "d": 25, "x": 0, "z": 0 }] },
+    { "id": 1, "elements": [
+        { "type": "tree", "x": -16, "z": -16 },
+        { "type": "tree", "x": -8, "z": -8 },
+        { "type": "tree", "x": 0, "z": 0 },
+        { "type": "tree", "x": 8, "z": 8 },
+        { "type": "tree", "x": 16, "z": 16 }
+    ]},
+    { "id": 2, "elements": [
+        { "type": "bush", "x": -15, "z": 0, "w": 20, "d": 4 },
+        { "type": "bush", "x": 0, "z": 0, "w": 20, "d": 4 },
+        { "type": "bush", "x": 15, "z": 0, "w": 20, "d": 4 }
+    ]},
+    { "id": 3, "elements": [{ "type": "water", "x": 0, "z": 0, "w": 50, "d": 10 }] }
+  ]
+}

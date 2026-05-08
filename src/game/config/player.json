@@ -1,0 +1,12 @@
+{
+  "moveSpeed": 25,
+  "thrust": {
+    "duration": 0.25,
+    "distance": 2.5,
+    "color": 13421772
+  },
+  "body": {
+    "color": 65280,
+    "size": 1.5
+  }
+}

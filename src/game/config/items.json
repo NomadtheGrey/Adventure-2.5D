@@ -1,0 +1,13 @@
+{
+  "spawns": [
+    { "type": "KEY_GOLD", "color": 16766720, "pos": { "x": 100, "y": 1, "z": 100 } },
+    { "type": "KEY_SILVER", "color": 12632256, "pos": { "x": -100, "y": 1, "z": -100 } },
+    { "type": "CHALICE", "color": 16711935, "pos": { "x": 0, "y": 1, "z": 200 } }
+  ],
+  "visuals": {
+    "size": 1.2,
+    "floatAmplitude": 0.2,
+    "floatFrequency": 0.005,
+    "rotationSpeed": 0.02
+  }
+}

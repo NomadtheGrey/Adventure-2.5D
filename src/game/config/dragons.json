@@ -1,0 +1,22 @@
+{
+  "dragonTypes": {
+    "RHYNODON": {
+      "color": 16711680,
+      "speed": 8,
+      "behavior": "stalker"
+    },
+    "GORGARYS": {
+      "color": 65280,
+      "speed": 6,
+      "behavior": "guard",
+      "guardRange": 30
+    },
+    "YVITHRAX": {
+      "color": 16776960,
+      "speed": 8,
+      "behavior": "thief",
+      "skittishRange": 15,
+      "fleeRange": 40
+    }
+  }
+}
