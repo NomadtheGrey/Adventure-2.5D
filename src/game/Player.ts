@@ -139,6 +139,12 @@ export class Player {
   private syncState() {
     GameState.playerPos.copy(this.mesh.position);
     GameState.playerRotation = this.mesh.rotation.y;
+    
+    // Movement tracking for audio
+    const velocity = (_moveVector.length() / this.speed); // normalized velocity
+    GameState.isMoving = velocity > 0.01;
+    GameState.movingSpeed = velocity;
+    GameState.isOutdoor = GameState.currentZone === 'SECTOR';
   }
 
   private normalizeAngle(angle: number): number {

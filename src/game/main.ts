@@ -5,6 +5,7 @@ import { DragonSystem } from './Dragons';
 import { Systems } from './Systems';
 import { InventorySystem } from './InventorySystem';
 import { GameState } from './GameState';
+import { Audio } from './AudioSystem';
 import dragonConfig from './config/dragons.json';
 
 // Rule 9: Scratch object for camera follow
@@ -104,6 +105,7 @@ export class Game {
     this.player.update(dt);
     this.dragons.update(dt);
     Systems.checkCollisions(this.player, this.world, this.dragons, GameState);
+    Audio.update(GameState);
 
     if (this.frames % 5 === 0) {
         this.updateMinimap();
@@ -125,8 +127,8 @@ export class Game {
   private updateMinimap() {
     const dragonPois = this.dragons.dragons
         .filter(d => !d.isDead)
-        .map((d, i) => ({
-            id: `dragon-${i}`, 
+        .map((d) => ({
+            id: d.id, 
             type: 'dragon' as const, 
             pos: d.position.clone(),
             color: (dragonConfig.dragonTypes as any)[d.type]?.color || 0xffffff
@@ -135,8 +137,8 @@ export class Game {
     const nearby = this.world.getNearby(this.player.mesh.position, 80);
     const objectPois = nearby
         .filter(obj => obj.type === 'item' || obj.type === 'gate')
-        .map((obj, i) => ({
-            id: `${obj.type}-${i}`,
+        .map((obj) => ({
+            id: obj.id,
             type: obj.type as any,
             pos: obj.mesh.position.clone(),
             color: obj.type === 'item' ? 0xff00ff : 0xffffff

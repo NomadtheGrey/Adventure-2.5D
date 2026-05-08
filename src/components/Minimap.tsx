@@ -4,35 +4,41 @@ import { motion } from 'motion/react';
 import { Audio } from '../game/AudioSystem';
 import { Volume2, VolumeX, Radar } from 'lucide-react';
 
-const MinimapMarkers = memo(() => {
-  const visiblePois = useMemo(() => {
-    return GameState.pois
-      .map(poi => {
-        const dx = (poi.pos.x - GameState.playerPos.x) * 2;
-        const dz = (poi.pos.z - GameState.playerPos.z) * 2;
-        return { poi, dx, dz };
-      })
-      .filter(({ dx, dz }) => Math.abs(dx) <= 90 && Math.abs(dz) <= 90);
-  }, [GameState.pois, GameState.playerPos.x, GameState.playerPos.z]);
+const MinimapMarkers = () => {
+    // We update every frame driven by App's tick
+    const playerPos = GameState.playerPos;
+    const pois = GameState.pois;
 
-  return (
-    <>
-      {visiblePois.map(({ poi, dx, dz }) => (
-        <div 
-          key={poi.id}
-          className="absolute w-2 h-2 rounded-sm transition-all duration-300"
-          style={{ 
-            left: `calc(50% + ${dx}px)`, 
-            top: `calc(50% + ${dz}px)`,
-            backgroundColor: `#${poi.color.toString(16).padStart(6, '0')}`,
-            transform: 'translate(-50%, -50%) scale(0.8)',
-            borderRadius: poi.type === 'wall' ? '0' : '50%'
-          }}
-        />
-      ))}
-    </>
-  );
-});
+    const visiblePois = pois.map(poi => {
+        // Radar scale: 1 unit = 1.1 pixels (80 units ~ 88px, fits in 90px radius)
+        const dx = (poi.pos.x - playerPos.x) * 1.1;
+        const dz = (poi.pos.z - playerPos.z) * 1.1;
+        return { poi, dx, dz };
+    }).filter(({ dx, dz }) => {
+        // Circle constraint: dx^2 + dz^2 <= radius^2 (90^2 = 8100)
+        return (dx * dx + dz * dz) <= 8100;
+    });
+
+    return (
+        <>
+            {visiblePois.map(({ poi, dx, dz }) => (
+                <div 
+                    key={poi.id}
+                    className="absolute w-2 h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                        left: `calc(50% + ${dx}px)`, 
+                        top: `calc(50% + ${dz}px)`,
+                        backgroundColor: `#${poi.color.toString(16).padStart(6, '0')}`,
+                        boxShadow: `0 0 10px #${poi.color.toString(16).padStart(6, '0')}`,
+                        transform: 'translate(-50%, -50%)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: poi.type === 'wall' ? '2px' : '50%'
+                    }}
+                />
+            ))}
+        </>
+    );
+};
 
 export const Minimap = () => {
     const [isMuted, setIsMuted] = useState(GameState.audio.isRadarMuted);

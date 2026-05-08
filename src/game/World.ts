@@ -4,6 +4,7 @@ import { WorldAssembler } from './WorldAssembler';
 import itemsConfig from './config/items.json';
 
 export interface WorldObject {
+  id: string;
   mesh: THREE.Object3D;
   isStatic: boolean;
   type: 'wall' | 'tree' | 'item' | 'gate';
@@ -47,7 +48,7 @@ export class World {
         mesh.position.set(item.pos.x, item.pos.y, item.pos.z);
         mesh.userData = { itemType: item.type };
         this.scene.add(mesh);
-        const obj: WorldObject = { mesh, isStatic: false, type: 'item' };
+        const obj: WorldObject = { id: `dummy-${item.type}-${Math.random()}`, mesh, isStatic: false, type: 'item' };
         this.objects.push(obj);
         this.addToGrid(obj);
     });
@@ -109,7 +110,7 @@ export class World {
       };
 
       this.scene.add(mesh);
-      const obj: WorldObject = { mesh, isStatic: false, type: 'item' };
+      const obj: WorldObject = { id: `item-${item.type}-${Math.random()}`, mesh, isStatic: false, type: 'item' };
       this.objects.push(obj);
       this.addToGrid(obj);
     });

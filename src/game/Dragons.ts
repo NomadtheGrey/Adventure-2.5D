@@ -47,6 +47,7 @@ class DragonSegment {
 }
 
 export class Dragon {
+  id: string;
   type: DragonType;
   scene: THREE.Scene;
   segments: DragonSegment[] = [];
@@ -59,6 +60,7 @@ export class Dragon {
   private readonly historyLimit = 100;
 
   constructor(scene: THREE.Scene, type: DragonType, startPos: THREE.Vector3) {
+    this.id = `dragon-${type}-${Math.random()}`;
     this.scene = scene;
     this.type = type;
     this.position.copy(startPos);

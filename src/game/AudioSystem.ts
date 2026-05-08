@@ -8,6 +8,10 @@ export class AudioManager {
     private ctx: AudioContext | null = null;
     private masterBus: GainNode | null = null;
     private drones: Map<string, OscillatorNode> = new Map();
+    private windFilter: BiquadFilterNode | null = null;
+    private groundingHum: { osc: OscillatorNode, gain: GainNode } | null = null;
+    private isolationSine: OscillatorNode | null = null;
+    private masterDetuneLFO: OscillatorNode | null = null;
 
     private ambientDrones: { osc: OscillatorNode, gain: GainNode }[] = [];
     private ambientActive = false;
@@ -69,9 +73,51 @@ export class AudioManager {
         // Pulsar Drone (Genre specific: Techno-ambient pulse)
         this.startPulsar();
 
+        // Tonal Isolation: A mid-frequency 220Hz (A2) sine wave (lonely technical observation)
+        this.startIsolation();
+
+        // Grounding Hum: Tactile movement feedback
+        this.startGrounding();
+
         // Wind/Noise layer
         this.startWind();
         this.startMoodSequence();
+    }
+
+    private startIsolation() {
+        if (!this.ctx || !this.masterBus) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 220;
+        gain.gain.value = 0.005; // Very low
+        osc.connect(gain);
+        gain.connect(this.masterBus);
+        osc.start();
+        this.isolationSine = osc;
+        this.ambientDrones.push({ osc, gain });
+    }
+
+    private startGrounding() {
+        if (!this.ctx || !this.masterBus) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        
+        osc.type = 'square';
+        osc.frequency.value = 55; // Low grounding hum
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 100;
+        
+        gain.gain.value = 0; // Starts silent
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterBus);
+        osc.start();
+        
+        this.groundingHum = { osc, gain };
     }
 
     private startPulsar() {
@@ -135,26 +181,26 @@ export class AudioManager {
         source.buffer = buffer;
         source.loop = true;
 
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.value = 400;
-        filter.Q.value = 10;
+        this.windFilter = this.ctx.createBiquadFilter();
+        this.windFilter.type = 'lowpass';
+        this.windFilter.frequency.value = 400;
+        this.windFilter.Q.value = 10;
 
         const gain = this.ctx.createGain();
         gain.gain.value = 0.02;
 
-        source.connect(filter);
-        filter.connect(gain);
+        source.connect(this.windFilter);
+        this.windFilter.connect(gain);
         gain.connect(this.masterBus);
         source.start();
 
-        // Modulate wind frequency
+        // Modulate wind frequency (Unstable wilderness floor)
         const lfo = this.ctx.createOscillator();
         const lfoGain = this.ctx.createGain();
         lfo.frequency.value = 0.1;
         lfoGain.gain.value = 200;
         lfo.connect(lfoGain);
-        lfoGain.connect(filter.frequency);
+        lfoGain.connect(this.windFilter.frequency);
         lfo.start();
     }
 
@@ -241,36 +287,57 @@ export class AudioManager {
             return;
         }
 
-        // Zone-based base intensity
-        const zoneIntensity = state.currentZone === 'LANDING' ? 0 : 0.5;
+        // 1. Wilderness Ambiance Sync
+        if (this.windFilter) {
+            const filterTarget = state.isOutdoor ? 1200 : 400;
+            this.windFilter.frequency.setTargetAtTime(filterTarget, this.ctx.currentTime, 1.0);
+        }
 
-        // Proximity to dragons (intensifies drone)
-        const activeDaemons = state.pois.filter(p => p.type === 'dragon');
-        let minDragDist = 1000;
-        activeDaemons.forEach(d => {
+        // 2. Grounding Hum (Movement Feedback)
+        if (this.groundingHum) {
+            const velocity = state.movingSpeed;
+            const motionIntensity = state.isMoving ? 0.02 * velocity : 0;
+            this.groundingHum.gain.gain.setTargetAtTime(motionIntensity, this.ctx.currentTime, 0.2);
+            
+            // Subtle frequency shift based on movement
+            this.groundingHum.osc.frequency.setTargetAtTime(55 + velocity * 5, this.ctx.currentTime, 0.1);
+        }
+
+        // 3. Threat Detection (Neural Interference)
+        const hostiles = state.pois.filter(p => p.type === 'dragon');
+        let maxThreat = 0;
+        hostiles.forEach(d => {
             const dist = state.playerPos.distanceTo(d.pos);
-            if (dist < minDragDist) minDragDist = dist;
+            const intensity = Math.max(0, 1 - (dist / 50)); // Slightly longer range for threat detection
+            if (intensity > maxThreat) maxThreat = intensity;
         });
 
-        const proximityIntensity = Math.max(0, 1 - minDragDist / 40); 
-        const totalIntensity = Math.min(1, zoneIntensity + proximityIntensity);
+        // Modulate master volume based on threat/intensity
+        this.masterBus.gain.setTargetAtTime(0.15 + (maxThreat * 0.1), this.ctx.currentTime, 0.5);
+
+        // Update ambient drones & Neural Jitter
+        const jitterIntensity = maxThreat * 50; 
         
-        // Modulate master volume slightly based on tension
-        this.masterBus.gain.setTargetAtTime(0.1 + (totalIntensity * 0.15), this.ctx.currentTime, 0.5);
-
-        // Intensify drones
         this.ambientDrones.forEach((d, i) => {
-            const isFundamental = i === 0;
-            const baseVol = isFundamental ? 0.08 : 0.03;
-            const targetVol = baseVol * (0.5 + totalIntensity * 1.5);
+            const isIsolation = d.osc === this.isolationSine;
+            const baseVol = isIsolation ? 0.005 : (i === 0 ? 0.08 : 0.03);
+            const targetVol = baseVol * (0.8 + maxThreat * 3);
             
-            d.gain.gain.setTargetAtTime(targetVol, this.ctx!.currentTime, 0.8);
+            d.gain.gain.setTargetAtTime(targetVol, this.ctx!.currentTime, 0.5);
             
-            // Slightly shift frequency in deep sectors
-            const baseFreq = d.osc.frequency.value;
-            const detune = totalIntensity * 2;
-            d.osc.detune.setTargetAtTime(detune * 100, this.ctx!.currentTime, 2.0);
+            // Apply Jitter: High threat creates "Signal Degradation"
+            if (maxThreat > 0.4) {
+               const rand = (Math.random() - 0.5) * maxThreat * 100;
+               d.osc.detune.setValueAtTime(jitterIntensity + rand, this.ctx!.currentTime);
+            } else {
+               d.osc.detune.setTargetAtTime(0, this.ctx!.currentTime, 0.5);
+            }
         });
+
+        // Random "Static Bursts" at high threat
+        if (maxThreat > 0.8 && Math.random() > 0.98) {
+            this.noise(0.05, 0.05 * maxThreat);
+        }
     }
 }
 

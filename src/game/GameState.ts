@@ -38,6 +38,9 @@ export interface GameStateData {
   activeIndex: number;
   isDead: boolean;
   isPaused: boolean;
+  isMoving: boolean;
+  movingSpeed: number;
+  isOutdoor: boolean;
   isInitialized: boolean;
   hasWon: boolean;
   currentZone: 'LANDING' | 'SECTOR';
@@ -73,6 +76,9 @@ export const GameState: GameStateData = {
   activeIndex: 0,
   isDead: false,
   isPaused: false,
+  isMoving: false,
+  movingSpeed: 0,
+  isOutdoor: false,
   isInitialized: false,
   hasWon: false,
   currentZone: 'LANDING',

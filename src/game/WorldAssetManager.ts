@@ -47,7 +47,7 @@ export class WorldAssetManager {
         mesh.position.set(x, (config.geometry.height || 0.5) / 2, z);
         this.scene.add(mesh);
         
-        const obj: WorldObject = { mesh, isStatic: true, type: 'wall' };
+        const obj: WorldObject = { id: `wall-${x}-${z}-${Math.random()}`, mesh, isStatic: true, type: 'wall' };
         this.objects.push(obj);
         this.addToGrid(obj);
     }
@@ -98,7 +98,7 @@ export class WorldAssetManager {
         const colMesh = new THREE.Mesh(new THREE.BoxGeometry(col.width, col.height, col.depth));
         colMesh.position.set(pos.x, y, pos.z);
         
-        const obj: WorldObject = { mesh: colMesh, isStatic: true, type: 'wall' };
+        const obj: WorldObject = { id: `inst-col-${pos.x}-${pos.z}-${Math.random()}`, mesh: colMesh, isStatic: true, type: 'wall' };
         this.objects.push(obj);
         this.addToGrid(obj);
     }
