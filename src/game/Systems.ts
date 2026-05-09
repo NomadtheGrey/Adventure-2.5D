@@ -222,24 +222,27 @@ export class Systems {
         dragonSys.dragons.forEach(dragon => {
             if (dragon.isDead) return;
 
-            let slainThisFrame = false;
-
-            // Check Slay (Spear vs Head)
+            // Priority: Check Slay (Spear vs Head)
             _headBox.setFromObject(dragon.segments[0].mesh);
             if (player.isThrusting && _spearBox.intersectsBox(_headBox)) {
                 events.push({ type: 'SLAY', dragon });
-                slainThisFrame = true;
+                return; // Skip DIE check if slain
             }
 
-            // Only check for death if we didn't just slay it
-            if (!slainThisFrame) {
-                const isEaten = dragon.segments.some(seg => {
-                    _objBox.setFromObject(seg.mesh);
-                    return _playerBox.intersectsBox(_objBox);
-                });
+            // Secondary: Check DIE (Body segments vs Player Core)
+            // We use a smaller box for the player to represent their core body, not including the spear
+            const playerPos = player.mesh.position;
+            const playerCoreBox = new THREE.Box3().setFromCenterAndSize(
+                new THREE.Vector3(playerPos.x, playerPos.y + 1, playerPos.z),
+                new THREE.Vector3(1.2, 2, 1.2)
+            );
 
-                if (isEaten) events.push({ type: 'DIE' });
-            }
+            const isEaten = dragon.segments.some(seg => {
+                _objBox.setFromObject(seg.mesh);
+                return playerCoreBox.intersectsBox(_objBox);
+            });
+
+            if (isEaten) events.push({ type: 'DIE' });
         });
 
         return events;

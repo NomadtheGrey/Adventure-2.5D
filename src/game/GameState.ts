@@ -118,7 +118,7 @@ export const GameState: GameStateData = {
 export const ITEMS: Record<ItemType, InventoryItem> = {
   [ItemType.KEY_GOLD]: { type: ItemType.KEY_GOLD, name: 'Gold Key', color: 0xffd700 },
   [ItemType.KEY_SILVER]: { type: ItemType.KEY_SILVER, name: 'Silver Key', color: 0xc0c0c0 },
-  [ItemType.KEY_BLACK]: { type: ItemType.KEY_BLACK, name: 'Black Key', color: 0x000000 },
+  [ItemType.KEY_BLACK]: { type: ItemType.KEY_BLACK, name: 'Black Key', color: 0x111111 },
   [ItemType.CHALICE]: { type: ItemType.CHALICE, name: 'Chalice', color: 0xff00ff },
   [ItemType.BRIDGE]: { type: ItemType.BRIDGE, name: 'Bridge', color: 0x8b4513 },
   [ItemType.MAGNET]: { type: ItemType.MAGNET, name: 'Flux Attractor', color: 0x0000ff },

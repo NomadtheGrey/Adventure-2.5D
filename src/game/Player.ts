@@ -92,9 +92,9 @@ export class Player {
     const colors: Record<string, number> = {
         'KEY_GOLD': 0xffd700,
         'KEY_SILVER': 0xc0c0c0,
-        'KEY_BLACK': 0x333333,
+        'KEY_BLACK': 0x111111,
         'MAGNET': 0x0000ff,
-        'BRIDGE': 0x8b4513, // Brown for wood
+        'BRIDGE': 0x8b4513,
         'CHALICE': 0xff00ff
     };
 

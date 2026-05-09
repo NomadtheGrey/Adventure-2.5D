@@ -278,7 +278,8 @@ export class WorldAssetManager {
 
     public createKeyGeometry(color: number): THREE.Group {
         const group = new THREE.Group();
-        const mat = new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 0.5 });
+        const emissiveColor = color === 0x111111 ? 0x222222 : color;
+        const mat = new THREE.MeshPhongMaterial({ color, emissive: emissiveColor, emissiveIntensity: 0.8 });
         
         // Key head (Ring)
         const head = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.2, 8, 16), mat);

@@ -234,14 +234,27 @@ export class World {
     spawns.forEach(item => {
       const type = item.type as ItemType;
       
-      // Randomize position if not the BRIDGE (which goes to start)
       let finalPos = new THREE.Vector3(item.pos.x, item.pos.y, item.pos.z);
       if (type === ItemType.BRIDGE) {
         finalPos.set(5, 1, 5); // Starting room
       } else {
-        // Truly scatter randomly across map territory
-        finalPos.x = (Math.random() - 0.5) * worldLimit * 2;
-        finalPos.z = (Math.random() - 0.5) * worldLimit * 2;
+        // Find a safe spot
+        let safe = false;
+        let attempts = 0;
+        while (!safe && attempts < 20) {
+            finalPos.x = (Math.random() - 0.5) * worldLimit * 2;
+            finalPos.z = (Math.random() - 0.5) * worldLimit * 2;
+            
+            // Avoid center landing zone spawn if it's not the bridge
+            if (finalPos.length() < 30) {
+                attempts++;
+                continue;
+            }
+
+            const nearby = this.getNearby(finalPos, 10);
+            safe = !nearby.some(o => o.isStatic);
+            attempts++;
+        }
       }
 
       this.spawnItemAt(type, finalPos);
