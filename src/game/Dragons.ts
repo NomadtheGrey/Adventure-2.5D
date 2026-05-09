@@ -60,10 +60,22 @@ const behaviorStrategies: Record<string, (ctx: BehaviorContext) => THREE.Vector3
 class DragonSegment {
     mesh: THREE.Mesh;
     constructor(scene: THREE.Scene, color: number) {
-        const geo = new THREE.BoxGeometry(1.8, 1.8, 1.8);
-        const mat = new THREE.MeshLambertMaterial({ color });
+        // Crystalline "Crystal Snake" Geometry: Icosahedron
+        const geo = new THREE.IcosahedronGeometry(1.6, 0); 
+        const mat = new THREE.MeshPhongMaterial({ 
+            color, 
+            emissive: color, 
+            emissiveIntensity: 0.5,
+            transparent: true,
+            opacity: 0.8,
+            flatShading: true
+        });
         this.mesh = new THREE.Mesh(geo, mat);
         scene.add(this.mesh);
+        
+        // Random slight scale for organic crystalline look
+        const s = 0.8 + Math.random() * 0.4;
+        this.mesh.scale.set(s, s, s);
     }
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Game } from './game/main';
 import { Minimap } from './components/Minimap';
+import { TelemetryDisplay } from './components/TelemetryDisplay';
 import { TitleCard, GearDisplay, Compass } from './components/StatusBars';
 import { InventoryBar, ControlsHint } from './components/InventoryBar';
 import { Overlays } from './components/Overlays';
@@ -53,6 +54,7 @@ export default function App() {
         <div className="flex flex-col gap-4">
             <TitleCard />
             <Minimap />
+            <TelemetryDisplay />
         </div>
 
       </div>

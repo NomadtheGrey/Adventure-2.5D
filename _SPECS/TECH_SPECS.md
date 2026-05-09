@@ -63,3 +63,10 @@ Use a 20x20 unit Spatial Grid for O(1) local collision lookups. High-fidelity ge
 
 ### 21. SEMANTIC CSS ARCHITECTURE
 Do NOT use long inline Tailwind utility strings for complex visual effects, repeated panels, or high-level UI components. Extract these into semantic classes within `src/index.css` using the `@layer components` directive. This ensures a single source of truth for the "Acheron Protocol" aesthetic and allows for global theme swapping (e.g., changing emerald-400 to cyan-400 in one place). Use variables or semantic utility classes like `.text-biometric`, `.text-telemetry`, and `.acheron-panel`.
+
+### 22. SERVICE-ORIENTED MODULE ARCHITECTURE
+The system is decoupled into specialized domains to maximize maintainability and reduce token overhead during development:
+*   **Systems Layer (`src/game/systems/`):** Stateless logic modules (Boundary, Collision, Reaction) that process physics and game rules.
+*   **Asset Layer (`src/game/assets/`):** Dedicated builders for Items, Castles, Structures, and Procedural Textures.
+*   **State Management (`GameState.ts`):** Centralized truth for the P.A.S. simulation.
+*   **Audio Synthesis (`src/game/audio/`):** Decoupled Drone and Effect synthesizers.

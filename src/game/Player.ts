@@ -24,7 +24,7 @@ export class Player {
     this.thrustDuration = playerConfig.thrust.duration;
     
     this.mesh = new THREE.Group();
-    this.mesh.position.copy(GameState.playerPos);
+    this.mesh.position.set(0, 2, 0); // Start at center
     this.itemContainer = new THREE.Group();
     this.initVisuals();
     this.initItemVisuals();
@@ -95,7 +95,7 @@ export class Player {
         'KEY_BLACK': 0x111111,
         'MAGNET': 0x0000ff,
         'BRIDGE': 0x8b4513,
-        'CHALICE': 0xff00ff
+        'CHALICE': 0xffd700
     };
 
     itemTypes.forEach(type => {

@@ -62,6 +62,7 @@ export interface GameStateData {
     showInventory: boolean;
     showControls: boolean;
   };
+  telemetryLogs: { id: string; text: string; time: number }[];
   debug: {
     fps: number;
     gpu: string;
@@ -73,7 +74,7 @@ export interface GameStateData {
 }
 
 export const GameState: GameStateData = {
-  playerPos: new Vector3(30, 0, 30),
+  playerPos: new Vector3(0, 2, 0),
   playerRotation: 0,
   inventory: [
     { type: ItemType.SPEAR, name: 'Spear', color: 0xcccccc }
@@ -105,6 +106,7 @@ export const GameState: GameStateData = {
     showInventory: true,
     showControls: true,
   },
+  telemetryLogs: [],
   debug: {
     fps: 0,
     gpu: 'Identifying...',
@@ -119,7 +121,7 @@ export const ITEMS: Record<ItemType, InventoryItem> = {
   [ItemType.KEY_GOLD]: { type: ItemType.KEY_GOLD, name: 'Gold Key', color: 0xffd700 },
   [ItemType.KEY_SILVER]: { type: ItemType.KEY_SILVER, name: 'Silver Key', color: 0xc0c0c0 },
   [ItemType.KEY_BLACK]: { type: ItemType.KEY_BLACK, name: 'Black Key', color: 0x111111 },
-  [ItemType.CHALICE]: { type: ItemType.CHALICE, name: 'Chalice', color: 0xff00ff },
+  [ItemType.CHALICE]: { type: ItemType.CHALICE, name: 'Chalice', color: 0xffd700 },
   [ItemType.BRIDGE]: { type: ItemType.BRIDGE, name: 'Bridge', color: 0x8b4513 },
   [ItemType.MAGNET]: { type: ItemType.MAGNET, name: 'Flux Attractor', color: 0x0000ff },
   [ItemType.SPEAR]: { type: ItemType.SPEAR, name: 'Spear', color: 0xcccccc },

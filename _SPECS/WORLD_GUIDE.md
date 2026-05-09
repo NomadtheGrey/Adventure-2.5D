@@ -28,19 +28,19 @@ The Surveyor's interface is a high-latency projection:
 *   **Bio-Link Termination:** Upon survey failure (Death), the P.A.S. initiates a graceful 3-second shutdown sequence before signal loss.
 *   **Cradle Repulsion:** Security Daemons are hard-coded to avoid the Landing Cradle's localized encryption. They will patrol the perimeter but effectively refuse to enter the buffer zone.
 
-## 6. THE CHAOS FACTOR: THE CLOUD-BAT
-*Planned Feature:* A chaotic entity that ignores all collision. It roams the map randomly. If it touches an item (Key/Spear/Magnet), it picks it up. If it is already carrying an item, it swaps it with whatever is on the ground. This introduces "Item Entropy," forcing the player to adapt when their needed key is suddenly moved to the other side of the world.
+## 6. THE CHAOS FACTOR: THE RECLAMATION DRONE
+Known as the "Cloud-Bat" in system logs, this is an automated reclamation unit (D20-core geometry) that ignores all collision and roams the map randomly. It serves as a guardian of data entropy, hovering above the labyrinth and pulsing with kinetic energy.
 
 ## 5. THE ARSENAL (THE SCANNER SUIT)
-*   **The Pulse Spear:** A high-frequency energy rod. It requires precision timing (The Thrust) to disrupt the dragon's code (slaying it).
-*   **The Magnet (Planned):** A ferromagnetic utility that pulls unequipped items toward the player from adjacent rooms.
-*   **The Bridge (Planned):** A phase-shifting tool that allows the player to walk through "Bush" and "Wall" boundaries for a brief duration.
+*   **The Pulse Spear:** (Implemented) A high-frequency energy rod. It requires precision timing (The Thrust) to disrupt the dragon's code.
+*   **The Flux Attractor:** (Implemented) A ferromagnetic utility that pulses with energy, making nearby items easier to acquire.
+*   **The Phase Bridge:** (Implemented) A phase-shifting tool that allows the player to bypass environmental obstacles like trees and bushes.
 
-## 6. THE STRONGHOLDS (SECTOR GATES)
-The world consists of three main sectors, each guarded by a "Sector Gate" (formerly Castles):
-1.  **Sector One (Yellow):** The quarantine zone where the Surveyor initializes.
-2.  **Sector Prime (Silver):** A mid-tier data cluster requiring the Silver encryption key.
-3.  **Sector Zero (Gold):** The root directory holding the Chalice; requires the Gold master key.
+## 6. THE STRONGHOLDS (CASTLES)
+The world consists of three fortified strongholds, each guarding critical system components:
+1.  **Silver Castle (East):** Guarded by Silver encryption. Contains the **Black Key**.
+2.  **Black Castle (West):** Guarded by Obsidian barriers. Contains the **Gold Key** and the **Chalice**.
+3.  **Gold Castle (North):** The system root. Contains the **Throne Room**, where the Chalice must be returned to initiate the system reboot.
 
 ## 7. VISUAL STYLE & ATMOSPHERE
 ### MOOD: THE "UNCANNY SIMULATION"
@@ -61,10 +61,10 @@ The environment should feel like a lush, natural world that is "rendering" in re
 
 ## 9. THE ARTIFACT REGISTRY: GOALS & UTILITY
 *   **The Pulse Spear:** (Implemented) Primary defense. Disrupts Daemon logic on impact.
-*   **Encryption Keys (Gold/Silver):** (Implemented) Used to bypass sector gates.
-*   **The Chalice:** (Implemented) The win-condition. Represents the "Master Archive."
-*   **The Magnetic Flux (Planned):** A passive upgrade that increases item pickup radius.
-*   **The Phase Bridge (Planned):** A temporary bypass for dense nature (Bushes).
+*   **Encryption Keys (Gold/Silver/Black):** (Implemented) Used to bypass stronghold gates and navigate the shifting labyrinth.
+*   **The Chalice:** (Implemented) The win-condition. Returning it to the Gold Throne reboots the system.
+*   **The Flux Attractor:** (Implemented) Ferromagnetic utility for item acquisition.
+*   **The Phase Bridge:** (Implemented) Utility for bypassing dense nature.
 *   **The Secret Dot (Planned):** A sub-pixel artifact hidden in a wall. Collecting it unlocks the "Underworld" render mode (Wireframe only).
 
 ## 10. INTENDED NARRATIVE ARC
@@ -75,6 +75,11 @@ The environment should feel like a lush, natural world that is "rendering" in re
 5.  **The Final Extraction:** Unlock Sector Zero, slay the final guardian, and secure the Chalice to "Reboot" the system.
 
 ## 11. TECHNICAL ROADMAP: PHASE 2
-*   **Dynamic Fog:** A "Data Mist" that rolls in near sector boundaries, limiting the P.A.S. range.
 *   **Audio Synths:** (Implemented) Procedural "Data Screams" for dragons and low-frequency "Hums" for keys.
 *   **Screen Shake & Glitch:** Visual feedback when the player is "Eaten" (Signal Lost), including CSS-based RGB shift effects.
+
+## 12. AGENT RECOMMENDATIONS (Future Vision)
+- **Neural Signatures:** Subtle screen glitches or color shifts when moving from one sector to another.
+- **Atmospheric Pressure:** Increasing audio low-end as you move away from the center.
+- **Procedural Loot:** Randomly placed "Flux Chips" that temporarily grant the hero different "debug powers" (e.g., Infinite Spear Thrust).
+- **Dynamic Inhabitants:** Neutral "Simulation Scavengers" that pick up dropped player items and move them to random map coordinates.

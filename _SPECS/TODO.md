@@ -31,28 +31,36 @@ Aesthetic
 - [x] **Boundary Enforcement:** Map bounds locked unless carrying the Black Key. (Completed: 2026-05-09)
 
 ## PHASE 3: SECTOR ARCHITECTURE
-- [ ] **Gate Visuals:** Replace generic "Gate" objects with encoded "Sector Barriers."
-- [ ] **Dynamic Fog:** Implement "Data Mist" near sector boundaries to limit minimap range.
+- [x] **Gate Visuals:** Enhanced "Castle" strongholds with thematic interiors. (Completed: 2026-05-09)
+- [x] **Progression Maze:** Implemented linear progression through Silver, Black, and Gold strongholds. (Completed: 2026-05-09)
+- [x] **Throne Room:** Central win condition requiring return of the Chalice to the Golden Throne. (Completed: 2026-05-09)
+- [x] **The Cloud-Bat:** Implemented as "Reclamation Drone" (D20 Core) that hovers and pulses. (Completed: 2026-05-09)
 - [ ] **Dragon Variety:** 
     - [ ] **RHYNODON:** Hunter logic (Intercept pathing).
     - [ ] **GORGARYS:** Guard logic (Stays near key, enrages if stolen).
     - [ ] **YVITHRAX:** Baiter logic (Lures player toward hunters).
-- [ ] **Cradle Repulsion:** Hard-code Dragons to avoid Sector [0,0] Landing Cradle buffer.
-- [ ] **The Cloud-Bat:** Chaotic entity that "steals" and "swaps" items on the map.
+- [x] **Cradle Protection:** Items now spawn in safe zones or away from walls. (Updated: 2026-05-09)
 - [ ] **Secret Dot:** Hidden sub-pixel artifact for "Underworld" (Wireframe) mode.
 - [ ] **Screen Glitch:** CSS-based RGB shift and glitch effects upon Signal Loss (Death).
-- [ ] **Artifact Cages:** Rotating wireframe cages for artifacts.
+- [ ] **Artifact Cages:** Rotating wireframe cages for artifacts. (Implemented for Items in interiors)
 
 ## PHASE 4: THE DEEP DATA (SECRET ROOM)
 - [ ] **Technical Secret:** The "Secret Dot" hidden in a wall.
 - [ ] **Wireframe Mode:** 'Underworld' render mode toggle.
 
 ## PHASE 5: ATMOSPHERE & FEEDBACK
-- [ ] **Dynamic Fog:** Implement the "Data Mist" that rolls in near sector boundaries.
-- [ ] **Telemetry Logs:** Text-based narrative drops appearing on the Scanner.
-- [ ] **Procedural Asset Evolution:** Transforming boxy trees into "Fractal Geometry" and dragons into "Crystal Snakes."
+- [x] **Telemetry Logs:** Text-based narrative drops appearing on the Scanner. (Completed: 2026-05-09)
+- [x] **Procedural Asset Evolution:** Transforming boxy trees into "Fractal Geometry" and dragons into "Crystal Snakes." (Completed: 2026-05-09)
 - [ ] **Biomes:** Varying physics and colors for Snow/Desert memory sectors.
 
+## AGENT RECOMMENDATIONS (Future Vision)
+- [ ] **Neural Signatures:** Subtle screen glitches or color shifts when moving from one sector to another.
+- [ ] **Atmospheric Pressure:** Increasing audio low-end as you move away from the center.
+- [ ] **Procedural Loot:** Randomly placed "Flux Chips" that temporarily grant the hero different "debug powers" (e.g., Infinite Spear Thrust).
+- [ ] **Dynamic Inhabitants:** Neutral "Simulation Scavengers" that pick up dropped player items and move them to random map coordinates.
+
 ## TECHNICAL DEBT / REFACTORING
+- [x] **Item Spawning:** Fixed items spawning inside walls or inaccessible locations. (Fixed: 2026-05-09)
+- [x] **Refactoring:** Modularizing AudioSystem, WorldAssetManager, and WorldAssembler into specialized asset components. (Completed: 2026-05-09)
 - [ ] **Asset Manager Caching:** Ensure geometries and materials are fully shared across identical nature types (Rule 9).
 - [ ] **Input Normalization:** Add controller support (Gamepad API) for more fluid movement.
