@@ -65,6 +65,25 @@ export default function App() {
       <Overlays />
       <PauseMenu />
       <DebugPanel />
+
+      {/* Phase Flash Effect */}
+      {GameState.isPhasing && (
+          <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px] z-50 pointer-events-none animate-pulse" />
+      )}
+
+      {/* Signal Loss Glitch Effect */}
+      {GameState.isDead && (
+        <div className="absolute inset-0 z-[100] pointer-events-none overflow-hidden bg-black/40">
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+          <div className="absolute inset-0 mix-blend-overlay animate-pulse bg-red-900/20" />
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-white opacity-50 animate-[scanline_2s_linear_infinite]" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-red-500 font-mono text-4xl font-bold tracking-widest animate-pulse">
+              SIGNAL LOST...
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,10 @@
   "spawns": [
     { "type": "KEY_GOLD", "color": 16766720, "pos": { "x": 100, "y": 1, "z": 100 } },
     { "type": "KEY_SILVER", "color": 12632256, "pos": { "x": -100, "y": 1, "z": -100 } },
-    { "type": "CHALICE", "color": 16711935, "pos": { "x": 0, "y": 1, "z": 200 } }
+    { "type": "KEY_BLACK", "color": 3355443, "pos": { "x": 50, "y": 1, "z": -150 } },
+    { "type": "MAGNET", "color": 255, "pos": { "x": -50, "y": 1, "z": 50 } },
+    { "type": "BRIDGE", "color": 16777215, "pos": { "x": 150, "y": 1, "z": 0 } },
+    { "type": "CHALICE", "color": 16711935, "pos": { "x": 0, "y": 1, "z": 240 } }
   ],
   "visuals": {
     "size": 1.2,

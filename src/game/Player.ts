@@ -9,6 +9,8 @@ const _moveVector = new THREE.Vector3();
 export class Player {
   mesh: THREE.Group;
   spear: THREE.Mesh;
+  itemContainer: THREE.Group;
+  itemMeshes: Record<string, THREE.Mesh> = {};
   scene: THREE.Scene;
   speed: Meters;
   input = { forward: false, backward: false, left: false, right: false };
@@ -22,7 +24,11 @@ export class Player {
     this.thrustDuration = playerConfig.thrust.duration;
     
     this.mesh = new THREE.Group();
+    this.mesh.position.copy(GameState.playerPos);
+    this.itemContainer = new THREE.Group();
     this.initVisuals();
+    this.initItemVisuals();
+    this.mesh.add(this.itemContainer);
     this.scene.add(this.mesh);
     this.setupInput();
   }
@@ -67,12 +73,75 @@ export class Player {
         const hover = Math.sin(performance.now() * 0.003) * 0.1;
         core.position.y = 1 + hover;
         ring.position.y = 1 + hover;
+        
+        const activeItem = GameState.inventory[GameState.activeIndex];
+        this.spear.visible = !activeItem;
         this.spear.position.y = 1 + hover;
+
+        this.itemContainer.position.y = 1.0 + hover;
+        this.itemContainer.position.z = -1.5; // Position it where the spear head roughly is
+        this.itemContainer.rotation.y += 0.05;
+        
+        this.updateItemVisibility();
     };
   }
 
+  private initItemVisuals() {
+    // Create a mesh for each item type to show when held
+    const itemTypes = ['KEY_GOLD', 'KEY_SILVER', 'KEY_BLACK', 'MAGNET', 'BRIDGE', 'CHALICE'];
+    const colors: Record<string, number> = {
+        'KEY_GOLD': 0xffd700,
+        'KEY_SILVER': 0xc0c0c0,
+        'KEY_BLACK': 0x333333,
+        'MAGNET': 0x0000ff,
+        'BRIDGE': 0x8b4513, // Brown for wood
+        'CHALICE': 0xff00ff
+    };
+
+    itemTypes.forEach(type => {
+        const geo = type === 'MAGNET' ? new THREE.TorusGeometry(0.6, 0.2, 8, 16) :
+                   type === 'CHALICE' ? new THREE.CylinderGeometry(0.5, 0.4, 1.2, 8) :
+                   type.includes('KEY') ? new THREE.BoxGeometry(0.4, 1.2, 0.2) :
+                   new THREE.BoxGeometry(0.8, 0.8, 0.8);
+
+        const mat = new THREE.MeshPhongMaterial({ 
+            color: colors[type], 
+            emissive: colors[type], 
+            emissiveIntensity: 0.8 
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.visible = false;
+        
+        // Add a glow light to the held item
+        const light = new THREE.PointLight(colors[type], 5, 3);
+        light.position.set(0, 0, 0);
+        mesh.add(light);
+        
+        this.itemContainer.add(mesh);
+        this.itemMeshes[type] = mesh;
+    });
+  }
+
+  private updateItemVisibility() {
+    const activeItem = GameState.inventory[GameState.activeIndex];
+    this.spear.visible = !activeItem;
+    
+    Object.keys(this.itemMeshes).forEach(type => {
+        const mesh = this.itemMeshes[type];
+        mesh.visible = activeItem?.type === type;
+        if (mesh.visible) {
+            // Animating the item
+            mesh.rotation.x += 0.02;
+            mesh.rotation.y += 0.03;
+        }
+    });
+  }
+
   private setupInput() {
-    window.addEventListener('keydown', (e) => this.handleKey(e.code, true));
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'KeyQ') GameState.intentToDrop = true;
+        this.handleKey(e.code, true);
+    });
     window.addEventListener('keyup', (e) => this.handleKey(e.code, false));
     window.addEventListener('mousedown', () => this.thrust());
     window.addEventListener('touchstart', () => this.thrust());

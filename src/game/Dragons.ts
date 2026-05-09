@@ -20,19 +20,40 @@ const _strategyVec = new THREE.Vector3();
 const _tempDir = new THREE.Vector3();
 
 const behaviorStrategies: Record<string, (ctx: BehaviorContext) => THREE.Vector3> = {
-    stalker: ({ playerPos, dragon }) => 
-        _strategyVec.subVectors(playerPos, dragon.position).normalize(),
+    stalker: ({ playerPos, dragon }) => {
+        // Intercept pathing: target slightly ahead of player
+        const forward = new THREE.Vector3(0, 0, -5).applyQuaternion(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, playerPos.y, 0))); // Rough estimation
+        _strategyVec.copy(playerPos).add(forward).sub(dragon.position).normalize();
+        return _strategyVec;
+    },
     
     guard: ({ dist, playerPos, dragon, config }) => {
-        if (dist < (config.guardRange || 30)) return _strategyVec.subVectors(playerPos, dragon.position).normalize();
-        if (dragon.guardTarget) return _strategyVec.subVectors(dragon.guardTarget, dragon.position).normalize();
+        const hasKey = GameState.inventory.some(i => i.type.includes('KEY'));
+        const guardRange = hasKey ? config.guardRange * 2 : config.guardRange;
+        
+        if (dist < guardRange) {
+            return _strategyVec.subVectors(playerPos, dragon.position).normalize();
+        }
+        if (dragon.guardTarget) {
+            return _strategyVec.subVectors(dragon.guardTarget, dragon.position).normalize();
+        }
         return _strategyVec.set(0, 0, 0);
     },
     
     thief: ({ dist, playerPos, dragon, config }) => {
-        if (dist < (config.skittishRange || 15)) return _strategyVec.subVectors(dragon.position, playerPos).normalize();
-        if (dist > (config.fleeRange || 40)) return _strategyVec.subVectors(playerPos, dragon.position).normalize();
-        return _strategyVec.set(Math.sin(performance.now() * 0.001), 0, Math.cos(performance.now() * 0.001)).normalize();
+        // Baiter: Stay near player but always move away if they get too close, 
+        // choosing a direction that licks toward other dragons
+        if (dist < 15) {
+             return _strategyVec.subVectors(dragon.position, playerPos).normalize();
+        }
+        if (dist > 35) {
+             return _strategyVec.subVectors(playerPos, dragon.position).normalize();
+        }
+        
+        // Circling behavior while baiting
+        const angle = performance.now() * 0.002;
+        _strategyVec.set(Math.cos(angle), 0, Math.sin(angle)).normalize();
+        return _strategyVec;
     }
 };
 

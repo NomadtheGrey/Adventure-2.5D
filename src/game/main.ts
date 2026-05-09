@@ -6,6 +6,7 @@ import { Systems } from './Systems';
 import { InventorySystem } from './InventorySystem';
 import { GameState } from './GameState';
 import { Audio } from './AudioSystem';
+import { CloudBat } from './CloudBat';
 import dragonConfig from './config/dragons.json';
 
 // Rule 9: Scratch object for camera follow
@@ -18,6 +19,7 @@ export class Game {
   world: World;
   player: Player;
   dragons: DragonSystem;
+  cloudBat: CloudBat;
   lastTime: number = performance.now();
   fpsLastTime: number = performance.now();
   frames: number = 0;
@@ -46,6 +48,7 @@ export class Game {
     this.world = new World(this.scene);
     this.player = new Player(this.scene);
     this.dragons = new DragonSystem(this.scene);
+    this.cloudBat = new CloudBat(this.scene, 400);
 
     this.setupEvents();
     this.animate();
@@ -104,7 +107,8 @@ export class Game {
 
     this.player.update(dt);
     this.dragons.update(dt);
-    Systems.checkCollisions(this.player, this.world, this.dragons, GameState);
+    this.cloudBat.update(dt, this.world, now);
+    Systems.checkCollisions(this.player, this.world, this.dragons, this.cloudBat, GameState);
     Audio.update(GameState);
 
     if (this.frames % 5 === 0) {
@@ -136,15 +140,30 @@ export class Game {
 
     const nearby = this.world.getNearby(this.player.mesh.position, 80);
     const objectPois = nearby
-        .filter(obj => obj.type === 'item' || obj.type === 'gate')
-        .map((obj) => ({
-            id: obj.id,
-            type: obj.type as any,
-            pos: obj.mesh.position.clone(),
-            color: obj.type === 'item' ? 0xff00ff : 0xffffff
-        }));
+        .map((obj) => {
+            let color = 0xffffff;
+            if (obj.type === 'item') color = 0xff00ff;
+            else if (obj.type === 'tree') color = 0x10b981;
+            else if (obj.type === 'bush') color = 0x34d399;
+            else if (obj.type === 'water') color = 0x60a5fa;
+            else if (obj.type === 'gate') color = 0xfacc15;
 
-    GameState.pois = [...dragonPois, ...objectPois];
+            return {
+                id: obj.id,
+                type: (obj.type as any),
+                pos: obj.mesh.position.clone(),
+                color
+            };
+        });
+
+    const batPoi = {
+        id: this.cloudBat.id,
+        type: 'bat' as const,
+        pos: this.cloudBat.mesh.position.clone(),
+        color: 0x9333ea as any
+    };
+
+    GameState.pois = [...dragonPois, ...objectPois, batPoi];
   }
 
   private render() {

@@ -60,3 +60,6 @@ The simulation space is defined by an 8x8 grid of 60x60 unit "Rooms" (Total size
 
 ### 20. COLLISION FIDELITY
 Use a 20x20 unit Spatial Grid for O(1) local collision lookups. High-fidelity geometry (like trees) should use simplified bounding box proxies for physics to keep the game loop under 16ms overhead.
+
+### 21. SEMANTIC CSS ARCHITECTURE
+Do NOT use long inline Tailwind utility strings for complex visual effects, repeated panels, or high-level UI components. Extract these into semantic classes within `src/index.css` using the `@layer components` directive. This ensures a single source of truth for the "Acheron Protocol" aesthetic and allows for global theme swapping (e.g., changing emerald-400 to cyan-400 in one place). Use variables or semantic utility classes like `.text-biometric`, `.text-telemetry`, and `.acheron-panel`.

@@ -207,12 +207,25 @@ export class AudioManager {
     private startMoodSequence() {
         if (!this.ctx) return;
         const playBlip = () => {
-            const notes = [220, 247.5, 275, 330]; // Geometric intervals
-            const note = notes[Math.floor(Math.random() * notes.length)];
-            this.beep(note, 2.0, 'sine', 0);
+            if (GameState.isPaused || GameState.isDead) {
+                setTimeout(playBlip, 1000);
+                return;
+            }
+
+            const notes = GameState.currentZone === 'LANDING' 
+                ? [440, 554.37, 659.25] // A Major triad (Peaceful)
+                : [220, 247.5, 275, 330]; // Geometric intervals (Uncertain)
             
-            // Re-schedule
-            setTimeout(playBlip, 4000 + Math.random() * 4000);
+            const note = notes[Math.floor(Math.random() * notes.length)];
+            
+            if (Math.random() > 0.4) {
+                this.beep(note, 1.5, 'sine', 0);
+            } else {
+                // High frequency "glitch chirp"
+                this.beep(note * 4, 0.05, 'triangle', 0);
+            }
+            
+            setTimeout(playBlip, 3000 + Math.random() * 5000);
         };
         playBlip();
     }
@@ -230,6 +243,19 @@ export class AudioManager {
     public playDie() {
         this.beep(110, 0.5, 'square');
         this.noise(0.8, 1.0);
+    }
+
+    public playPhase() {
+        if (!this.ctx || !this.masterBus) return;
+        const now = this.ctx.currentTime;
+        this.beep(200, 0.1, 'sine', 0);
+        this.beep(800, 0.1, 'sawtooth', 0.05);
+        this.noise(0.05, 0.2);
+    }
+
+    public playBoundary() {
+        if (!this.ctx || !this.masterBus) return;
+        this.noise(0.3, 0.5);
     }
 
     private beep(freq: number, duration: number, type: OscillatorType = 'sine', delay = 0) {
@@ -277,7 +303,7 @@ export class AudioManager {
 
         // Global Mute or Pause handling
         if (state.audio.isMuted || state.isPaused) {
-            this.masterBus.gain.setTargetAtTime(0, this.ctx.currentTime, 0.2);
+            this.masterBus.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.2); 
             return;
         }
 
@@ -289,7 +315,8 @@ export class AudioManager {
 
         // 1. Wilderness Ambiance Sync
         if (this.windFilter) {
-            const filterTarget = state.isOutdoor ? 1200 : 400;
+            const isAtEdges = Math.abs(state.playerPos.x) > 200 || Math.abs(state.playerPos.z) > 200;
+            const filterTarget = isAtEdges ? 2000 : (state.currentZone === 'LANDING' ? 600 : 400);
             this.windFilter.frequency.setTargetAtTime(filterTarget, this.ctx.currentTime, 1.0);
         }
 
@@ -303,12 +330,17 @@ export class AudioManager {
             this.groundingHum.osc.frequency.setTargetAtTime(55 + velocity * 5, this.ctx.currentTime, 0.1);
         }
 
-        // 3. Threat Detection (Neural Interference)
+        // 3. Sector Harmonics (Room-based frequency modulation)
+        const roomX = Math.floor(state.playerPos.x / 60);
+        const roomZ = Math.floor(state.playerPos.z / 60);
+        const sectorDissonance = (roomX + roomZ) * 2; 
+
+        // 4. Threat Detection (Neural Interference)
         const hostiles = state.pois.filter(p => p.type === 'dragon');
         let maxThreat = 0;
         hostiles.forEach(d => {
             const dist = state.playerPos.distanceTo(d.pos);
-            const intensity = Math.max(0, 1 - (dist / 50)); // Slightly longer range for threat detection
+            const intensity = Math.max(0, 1 - (dist / 50)); 
             if (intensity > maxThreat) maxThreat = intensity;
         });
 
@@ -320,7 +352,12 @@ export class AudioManager {
         
         this.ambientDrones.forEach((d, i) => {
             const isIsolation = d.osc === this.isolationSine;
-            const baseVol = isIsolation ? 0.005 : (i === 0 ? 0.08 : 0.03);
+            const baseFreq = isIsolation ? 220 : (i === 0 ? 32.7 : 49.0);
+            
+            // Apply Sector Dissonance
+            d.osc.frequency.setTargetAtTime(baseFreq + sectorDissonance, this.ctx!.currentTime, 2.0);
+
+            const baseVol = isIsolation ? 0.005 : (i === 0 ? 0.08 : 0.04);
             const targetVol = baseVol * (0.8 + maxThreat * 3);
             
             d.gain.gain.setTargetAtTime(targetVol, this.ctx!.currentTime, 0.5);

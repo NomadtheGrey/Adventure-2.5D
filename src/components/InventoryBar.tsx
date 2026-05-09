@@ -15,10 +15,10 @@ export const InventoryBar = () => {
             <div className="relative flex flex-col items-end h-full w-full">
                 {/* Active System Header & Detail Panel */}
                 <div className="mb-4 mr-2 relative z-20 pointer-events-auto">
-                    <div className="bg-black/80 backdrop-blur-2xl border border-white/10 p-5 rounded-2xl flex flex-col gap-2 min-w-[240px] shadow-2xl items-end">
+                    <div className="acheron-panel-dark p-5 flex flex-col gap-2 min-w-[240px] items-end">
                         <div className="flex items-center justify-between w-full">
-                            <div className="text-[10px] font-mono text-emerald-500/40">HUD_v4.2</div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500/60">Active System</span>
+                            <div className="text-telemetry opacity-40">HUD_v4.2</div>
+                            <span className="acheron-label">Active System</span>
                         </div>
                         
                         <AnimatePresence mode="wait">
@@ -30,7 +30,7 @@ export const InventoryBar = () => {
                                 className="flex items-center gap-4 py-2 flex-row-reverse"
                             >
                                 <div 
-                                    className="w-12 h-12 rounded-xl border border-emerald-500/30 shadow-[0_0_20px_rgba(52,211,153,0.15)] flex items-center justify-center overflow-hidden relative"
+                                    className="acheron-slot border-emerald-500/30 shadow-[0_0_20px_rgba(52,211,153,0.15)] overflow-hidden"
                                     style={{ backgroundColor: activeItem?.color ? `#${activeItem.color.toString(16).padStart(6, '0')}11` : '#111' }}
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
@@ -51,7 +51,7 @@ export const InventoryBar = () => {
                 </div>
 
                 {/* The "Rail" - Fixed relative to the icon centers (52px = 8px margin + 20px padding + 24px icon center) */}
-                <div className="absolute right-[52px] top-40 bottom-32 w-[1px] bg-emerald-500/20 shadow-[0_0_10px_rgba(52,211,153,0.1)] z-0" />
+                <div className="acheron-rail right-[52px] top-40 bottom-32" />
                 
                 {/* Scrolling List Container */}
                 <div className="relative h-full flex items-center justify-end w-full overflow-hidden pr-8 z-10">
@@ -73,11 +73,7 @@ export const InventoryBar = () => {
                                         opacity: isActive ? 1 : Math.max(0.1, 0.4 - dist * 0.12),
                                         x: isActive ? -16 : 0
                                     }}
-                                    className={`relative w-10 h-10 transition-all flex items-center justify-center rounded-sm ${
-                                        isActive 
-                                            ? 'border-2 border-emerald-400 bg-emerald-400/20 shadow-[0_0_20px_rgba(52,211,153,0.3)]' 
-                                            : 'border border-white/5 bg-black/50'
-                                    }`}
+                                    className={`${isActive ? 'acheron-inventory-box-active' : 'acheron-inventory-box'}`}
                                 >
                                     {/* Scanning Line overlay for active items */}
                                     {isActive && (
@@ -102,7 +98,7 @@ export const InventoryBar = () => {
                                         <div className={`whitespace-nowrap text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 ${isActive ? 'text-emerald-400 scale-110 origin-right' : 'text-white/20'}`}>
                                             {item.name}
                                         </div>
-                                        <div className={`whitespace-nowrap text-[8px] font-mono uppercase tracking-[0.1em] transition-colors ${isActive ? 'text-white/40' : 'text-white/10'}`}>
+                                        <div className={`text-telemetry transition-colors ${isActive ? 'text-white/40' : 'text-white/10'}`}>
                                             [{item.type.slice(0, 3)}_{idx.toString().padStart(2, '0')}]
                                         </div>
                                     </div>
@@ -118,7 +114,7 @@ export const InventoryBar = () => {
 
             {/* Status Block */}
             <div className="absolute bottom-20 right-10 flex flex-col gap-2 items-end">
-                <div className="text-[9px] font-black tracking-[0.3em] text-emerald-500/30 uppercase">Hull Matrix Integrity</div>
+                <div className="acheron-label opacity-30">Hull Matrix Integrity</div>
                 <div className="flex gap-1.5 flex-row-reverse">
                     {[...Array(12)].map((_, i) => (
                         <div 
@@ -136,15 +132,16 @@ export const ControlsHint = () => {
     if (!GameState.hud.showControls) return null;
     
     return (
-        <div className="absolute bottom-8 left-8 p-6 flex flex-col gap-3 group pointer-events-none bg-black/40 backdrop-blur-md border border-white/5 rounded-2xl z-20">
+        <div className="absolute bottom-8 left-8 p-6 flex flex-col gap-3 group pointer-events-none acheron-panel z-20">
             <div className="flex flex-col gap-1 mb-1">
-                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500/80">Interface Guide</div>
+                <div className="acheron-label opacity-80">Interface Guide</div>
                 <div className="h-[1px] w-8 bg-emerald-500/40" />
             </div>
             
             <div className="flex flex-col gap-2">
                 {[
                     { keys: ['W', 'A', 'S', 'D'], label: 'Navigation' },
+                    { keys: ['Q'], label: 'Drop System' },
                     { keys: ['CLICK'], label: 'Primary Action' },
                     { keys: ['SCROLL'], label: 'Select System' },
                     { keys: ['ESC'], label: 'System Options' }
@@ -157,7 +154,7 @@ export const ControlsHint = () => {
                                 </span>
                             ))}
                         </div>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/30">
+                        <span className="text-telemetry tracking-[0.15em] opacity-30">
                             {item.label}
                         </span>
                     </div>

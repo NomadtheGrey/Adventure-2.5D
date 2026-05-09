@@ -12,9 +12,7 @@ export const Overlays = () => {
                     exit={{ opacity: 0 }}
                     className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-3xl pointer-events-auto"
                 >
-                    <div className="absolute inset-0 z-0 opacity-20 pointer-events-none overflow-hidden">
-                        <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
-                    </div>
+                    <div className="absolute inset-0 z-0 opacity-20 pointer-events-none acheron-scanner-glass" />
 
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
@@ -32,31 +30,27 @@ export const Overlays = () => {
                             </div>
                         </div>
 
-                        <h1 className="text-6xl font-black tracking-[0.2em] uppercase italic text-emerald-400 mb-2">INITIALIZING</h1>
-                        <p className="text-sm font-bold text-emerald-400/60 uppercase tracking-[0.5em] mb-12">Pulse Acquisition Scanner // v4.2</p>
+                        <h1 className="text-6xl text-biometric italic mb-2 tracking-[0.2em] font-black">INITIALIZING</h1>
+                        <p className="text-biometric text-sm opacity-60 mb-12 tracking-[0.5em]">Pulse Acquisition Scanner // v4.2</p>
 
                         <motion.button 
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            animate={{ 
-                                boxShadow: ["0 0 0px #34d399", "0 0 20px #34d399", "0 0 0px #34d399"]
-                            }}
-                            transition={{ duration: 2, repeat: Infinity }}
                             onClick={() => {
                                 Audio.init();
                                 Audio.playUIClick();
                                 GameState.isInitialized = true;
                             }}
-                            className="group relative px-12 py-4 bg-emerald-500 text-black font-black uppercase tracking-widest rounded-sm overflow-hidden"
+                            className="btn-link-engage min-w-[280px]"
                         >
                             <span className="relative z-10 text-lg">Engage Link</span>
                         </motion.button>
                         
                         <div className="mt-12 flex gap-8">
-                            <div className="text-[10px] text-white/20 uppercase tracking-widest font-mono">
+                            <div className="text-telemetry">
                                 Sector: LAB-0{GameState.worldSeed.toString(16).slice(2, 6).toUpperCase()}
                             </div>
-                            <div className="text-[10px] text-white/20 uppercase tracking-widest font-mono">
+                            <div className="text-telemetry">
                                 Bio-Link: READY
                             </div>
                         </div>
@@ -69,19 +63,20 @@ export const Overlays = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-red-950/90 backdrop-blur-2xl"
+                    className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-red-950/90 backdrop-blur-2xl acheron-scanner-glass"
                 >
                     <motion.h1 
                         initial={{ scale: 0.5 }}
                         animate={{ scale: 1 }}
-                        className="text-8xl font-black tracking-tighter uppercase italic text-red-500 mb-2"
+                        className="text-8xl font-black tracking-tighter uppercase italic text-red-500 mb-2 drop-shadow-[0_0_20px_rgba(239,68,68,0.6)]"
                     >
                         SIGNAL LOST
                     </motion.h1>
-                    <p className="text-xl font-bold mb-10 text-red-500/60 uppercase tracking-[0.5em]">Link Severed // Biometric Failure</p>
+                    <p className="text-telemetry text-xl !text-red-500/60 mb-10">Link Severed // Biometric Failure</p>
                     <button 
                         onClick={() => window.location.reload()}
-                        className="px-10 py-5 bg-white text-red-950 font-black uppercase tracking-widest rounded-full hover:bg-red-200 transition-colors pointer-events-auto"
+                        className="btn-link-engage !bg-red-500 !text-black !border-red-500 hover:!bg-red-400 !clip-none min-w-[280px]"
+                        style={{ clipPath: 'none' }}
                     >
                         Re-establish Link
                     </button>
@@ -93,23 +88,39 @@ export const Overlays = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-emerald-950/90 backdrop-blur-2xl"
+                    className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-emerald-950/90 backdrop-blur-2xl acheron-scanner-glass"
                 >
                     <motion.h1 
                         initial={{ scale: 0.5 }}
                         animate={{ scale: 1 }}
-                        className="text-8xl font-black tracking-tighter uppercase italic text-emerald-400 mb-2"
+                        className="text-8xl acheron-header mb-2 scale-[2.5]"
                     >
                         ARTIFACT SECURED
                     </motion.h1>
-                    <p className="text-xl font-bold mb-10 text-emerald-400/60 uppercase tracking-[0.5em]">Source Code Unified // Extraction Ready</p>
+                    <p className="text-biometric opacity-60 mb-10 tracking-[0.5em] text-xl mt-8">Source Code Unified // Extraction Ready</p>
                     <button 
                         onClick={() => window.location.reload()}
-                        className="px-10 py-5 bg-white text-emerald-950 font-black uppercase tracking-widest rounded-full hover:bg-emerald-100 transition-colors pointer-events-auto"
+                        className="btn-link-engage !bg-white !text-emerald-950 !border-white hover:!bg-emerald-100 !clip-none min-w-[280px]"
+                        style={{ clipPath: 'none' }}
                     >
                         Terminate Survey
                     </button>
                 </motion.div>
+            )}
+
+            {/* In-game Message Display */}
+            {GameState.message && (
+                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 z-50">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="bg-black/60 border border-emerald-500/50 text-emerald-400 px-6 py-3 font-mono text-xl tracking-widest backdrop-blur-md"
+                    >
+                        <span className="animate-pulse mr-2">▲</span>
+                        {GameState.message}
+                    </motion.div>
+                </div>
             )}
         </AnimatePresence>
     );

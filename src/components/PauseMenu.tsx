@@ -37,11 +37,11 @@ export const PauseMenu = () => {
                     <motion.div 
                         initial={{ scale: 0.9, y: 20 }}
                         animate={{ scale: 1, y: 0 }}
-                        className="w-[450px] bg-[#0c0d0f] border border-white/10 rounded-2xl shadow-2xl p-10 flex flex-col gap-8 overflow-hidden relative"
+                        className="w-[450px] acheron-panel-dark p-10 flex flex-col gap-8 overflow-hidden relative"
                     >
                         {/* Hardware-like details */}
                         <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/50" />
-                        <div className="absolute top-2 right-4 text-[8px] font-mono text-white/10 tracking-[0.5em]">SYSTEM_PAUSER_V3</div>
+                        <div className="text-telemetry absolute top-2 right-4 opacity-10">SYSTEM_PAUSER_V3</div>
                         
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
@@ -49,7 +49,7 @@ export const PauseMenu = () => {
                                     <Settings className="w-5 h-5 text-emerald-400" />
                                     <h1 className="text-xl font-black uppercase tracking-[0.2em] text-white">Neural Hub</h1>
                                 </div>
-                                <div className="text-[10px] font-bold text-emerald-500/40 uppercase mt-1 tracking-widest ml-8">Options & Configuration</div>
+                                <div className="text-telemetry mt-1 opacity-40 ml-8">Options & Configuration</div>
                             </div>
                             <button onClick={resume} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
                                 <X className="w-5 h-5 text-white/40" />
@@ -60,7 +60,7 @@ export const PauseMenu = () => {
                         <div className="grid grid-cols-1 gap-6">
                             {/* Audio Section */}
                             <div className="flex flex-col gap-3">
-                                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20 ml-2">Audio Systems</div>
+                                <div className="text-telemetry opacity-20 ml-2">Audio Systems</div>
                                 <div className="grid grid-cols-1 gap-2">
                                     <button 
                                         onClick={toggleMute}
@@ -69,7 +69,7 @@ export const PauseMenu = () => {
                                         <div className="flex items-center gap-4">
                                             {GameState.audio.isMuted ? <VolumeX className="text-red-400" /> : <Volume2 className="text-emerald-400" />}
                                             <div className="text-left">
-                                                <div className="text-[10px] font-bold uppercase tracking-widest text-white/40">Master Link Volume</div>
+                                                <div className="text-telemetry opacity-40">Master Link Volume</div>
                                                 <div className="text-sm font-black text-white">{GameState.audio.isMuted ? 'Muted' : 'Synchronized'}</div>
                                             </div>
                                         </div>
@@ -80,7 +80,7 @@ export const PauseMenu = () => {
 
                             {/* HUD Section */}
                             <div className="flex flex-col gap-3">
-                                <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20 ml-2">Optic Overlays (HUD)</div>
+                                <div className="text-telemetry opacity-20 ml-2">Optic Overlays (HUD)</div>
                                 <div className="grid grid-cols-2 gap-3">
                                     {[
                                         { id: 'showMinimap', label: 'Tactical Map', key: 'showMinimap' },
@@ -96,7 +96,7 @@ export const PauseMenu = () => {
                                                 className={`flex items-center justify-between p-3 bg-white/5 border rounded-lg transition-all ${visible ? 'border-emerald-500/30' : 'border-white/5 opacity-40'}`}
                                             >
                                                 <div className="flex flex-col text-left">
-                                                    <div className="text-[8px] font-bold uppercase tracking-widest text-white/40">{item.label}</div>
+                                                    <div className="text-telemetry opacity-40">{item.label}</div>
                                                     <div className="text-[10px] font-black text-white">{visible ? 'VISIBLE' : 'HIDDEN'}</div>
                                                 </div>
                                                 {visible ? <Eye className="w-4 h-4 text-emerald-400" /> : <EyeOff className="w-4 h-4 text-white/20" />}
@@ -109,7 +109,7 @@ export const PauseMenu = () => {
 
                         {/* Progress Meter */}
                         <div className="pt-4 border-t border-white/5 flex flex-col gap-3">
-                             <div className="flex justify-between text-[10px] font-mono tracking-widest text-white/20 uppercase items-center">
+                             <div className="flex justify-between text-telemetry opacity-20 items-center">
                                 <span>Sector Artifact Retention</span>
                                 <span className="text-emerald-500/60 font-black">{GameState.inventory.length} / 8 DATACORE</span>
                              </div>
@@ -124,13 +124,14 @@ export const PauseMenu = () => {
 
                         <button 
                             onClick={resume}
-                            className="w-full py-5 bg-emerald-500 hover:bg-emerald-400 text-[#0c0d0f] font-black uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 rounded-xl shadow-[0_10px_30px_rgba(52,211,153,0.2)] mt-2"
+                            className="btn-link-engage !w-full !rounded-xl !clip-none py-6 flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.2)] mt-2"
+                            style={{ clipPath: 'none' }}
                         >
                             <Power className="w-5 h-5" />
                             Return to Reality
                         </button>
 
-                        <div className="text-center text-[8px] text-white/5 uppercase tracking-[0.8em] font-bold mt-2">
+                        <div className="text-center text-telemetry !opacity-5 mt-2">
                             Acheron Protocol Activated
                         </div>
                     </motion.div>

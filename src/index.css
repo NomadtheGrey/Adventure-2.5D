@@ -1,1 +1,95 @@
 @import "tailwindcss";
+
+@layer components {
+  /* CRT/Scanner Glass Effect */
+  .acheron-scanner-glass {
+    position: relative;
+    overflow: hidden;
+    &::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 10;
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+  }
+
+  /* Primary Emerald UI Text */
+  .text-biometric {
+    @apply text-emerald-400 font-medium tracking-tight drop-shadow-[0_0_8px_rgba(52,211,153,0.6)];
+  }
+
+  /* Small Mono-spaced Data */
+  .text-telemetry {
+    @apply font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-500/70;
+  }
+
+  /* Primary Action Buttons */
+  .btn-link-engage {
+    @apply px-8 py-3 bg-emerald-950/40 border-2 border-emerald-500/40 text-emerald-400 
+           hover:bg-emerald-400 hover:text-emerald-950 hover:border-emerald-400
+           transition-all duration-200 active:scale-95
+           uppercase font-bold tracking-tighter text-sm relative overflow-hidden;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+  }
+
+  /* Base Panels */
+  .acheron-panel {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl;
+  }
+
+  .acheron-panel-dark {
+    @apply bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl;
+  }
+
+  /* HUD Typography */
+  .acheron-label {
+    @apply text-[10px] uppercase tracking-[0.3em] font-black text-emerald-400/60;
+  }
+
+  .acheron-header {
+    @apply text-3xl font-black tracking-tighter uppercase italic text-emerald-400;
+  }
+
+  /* UI Modules */
+  .acheron-slot {
+    @apply w-12 h-12 rounded-xl border border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)] 
+           flex items-center justify-center overflow-hidden relative transition-all duration-300;
+  }
+
+  .acheron-slot-active {
+    @apply border-emerald-500/50 shadow-[0_0_20px_rgba(52,211,153,0.3)] scale-110;
+  }
+
+  .acheron-button-small {
+    @apply p-1.5 bg-black/40 hover:bg-black/80 border border-white/10 rounded-lg 
+           pointer-events-auto transition-all active:scale-95 text-emerald-400;
+  }
+
+  /* Inventory & Modules */
+  .acheron-rail {
+    @apply absolute w-[1px] bg-emerald-500/20 shadow-[0_0_10px_rgba(52,211,153,0.1)] z-0;
+  }
+
+  .acheron-inventory-box {
+    @apply relative w-10 h-10 transition-all flex items-center justify-center rounded-sm 
+           border border-white/5 bg-black/50;
+  }
+
+  .acheron-inventory-box-active {
+    @apply border-2 border-emerald-400 bg-emerald-400/20 shadow-[0_0_20px_rgba(52,211,153,0.3)];
+  }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}

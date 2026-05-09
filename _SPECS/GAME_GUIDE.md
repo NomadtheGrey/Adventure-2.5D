@@ -29,3 +29,12 @@ This guide outlines universal principles for game development within this projec
 - **Lonely Technical Observation**: Maintain a 220Hz "Isolation Sine" and unstable noise floors to emphasize the vastness of the digital wilderness.
 - **Neural Interference**: Hostiles do not make biological sounds. Their presence causes the player's audio stack to struggle and glitch.
 - **Tactile Grounding**: Subtle low-frequency hums (55Hz) provide feedback for physical movement through the simulation.
+
+## 6. CSS Architecture
+- **No Inline Bloat**: Do NOT use long inline Tailwind utility strings for complex visual effects like CRT scans, specific glows, or custom buttons.
+- **Semantic Components**: Use established component classes defined in `index.css`:
+  - `.acheron-scanner-glass`: Applies CRT scanlines and radial distortion.
+  - `.text-biometric`: High-visibility emerald text with a digital glow.
+  - `.text-telemetry`: Micro-data styling (monospace, tracked-out, reduced opacity).
+  - `.btn-link-engage`: The standard "System Action" button with clipped corners and hover states.
+- **Expansion**: If a new repeated visual pattern is identified, it MUST be extracted into a component class within the `@layer components` of `index.css`.

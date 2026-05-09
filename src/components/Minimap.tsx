@@ -9,33 +9,84 @@ const MinimapMarkers = () => {
     const playerPos = GameState.playerPos;
     const pois = GameState.pois;
 
-    const visiblePois = pois.map(poi => {
+    const markers = pois.map(poi => {
         // Radar scale: 1 unit = 1.1 pixels (80 units ~ 88px, fits in 90px radius)
         const dx = (poi.pos.x - playerPos.x) * 1.1;
         const dz = (poi.pos.z - playerPos.z) * 1.1;
-        return { poi, dx, dz };
-    }).filter(({ dx, dz }) => {
-        // Circle constraint: dx^2 + dz^2 <= radius^2 (90^2 = 8100)
-        return (dx * dx + dz * dz) <= 8100;
-    });
+        const distSq = dx * dx + dz * dz;
+        const LIMIT_SQ = 8100; // 90^2
+
+        let isOffscreen = distSq > LIMIT_SQ;
+        let finalDx = dx;
+        let finalDz = dz;
+
+        if (isOffscreen) {
+            // Only show trackers for important entities
+            if (poi.type === 'bat' || poi.type === 'dragon' || poi.type === 'item') {
+                const dist = Math.sqrt(distSq);
+                finalDx = (dx / dist) * 90;
+                finalDz = (dz / dist) * 90;
+            } else {
+                return null;
+            }
+        }
+
+        return { poi, dx: finalDx, dz: finalDz, isOffscreen };
+    }).filter((m): m is any => m !== null);
 
     return (
         <>
-            {visiblePois.map(({ poi, dx, dz }) => (
-                <div 
-                    key={poi.id}
-                    className="absolute w-2 h-2 rounded-full transition-all duration-300"
-                    style={{ 
-                        left: `calc(50% + ${dx}px)`, 
-                        top: `calc(50% + ${dz}px)`,
-                        backgroundColor: `#${poi.color.toString(16).padStart(6, '0')}`,
-                        boxShadow: `0 0 10px #${poi.color.toString(16).padStart(6, '0')}`,
-                        transform: 'translate(-50%, -50%)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: poi.type === 'wall' ? '2px' : '50%'
-                    }}
-                />
-            ))}
+            {markers.map(({ poi, dx, dz, isOffscreen }) => {
+                let size = 8;
+                let opacity = isOffscreen ? 0.6 : 1;
+                let borderRadius = '50%';
+                
+                if (poi.type === 'tree') { size = 5; opacity = 0.6; }
+                else if (poi.type === 'bush') { size = 4; opacity = 0.5; }
+                else if (poi.type === 'water') { size = 12; opacity = 0.4; borderRadius = '4px'; }
+                else if (poi.type === 'wall') { size = 6; opacity = 0.7; borderRadius = '2px'; }
+                else if (poi.type === 'gate') { size = 10; opacity = 0.9; borderRadius = '2px'; }
+                else if (poi.type === 'dragon') { size = 8; opacity = 1.0; }
+                else if (poi.type === 'bat') { size = 6; opacity = 1.0; borderRadius = '0'; }
+
+                if (isOffscreen) size = 4;
+
+                const colorStr = `#${poi.color.toString(16).padStart(6, '0')}`;
+
+                return (
+                    <motion.div 
+                        key={poi.id}
+                        initial={false}
+                        animate={{ 
+                            left: `calc(50% + ${dx}px)`, 
+                            top: `calc(50% + ${dz}px)`,
+                            opacity: opacity,
+                            scale: isOffscreen ? [1, 1.5, 1] : 1
+                        }}
+                        transition={{ 
+                            scale: { repeat: Infinity, duration: 1 }
+                        }}
+                        className={`absolute transition-colors duration-300 ${poi.type === 'item' ? 'animate-ping' : ''} ${poi.type === 'bat' ? 'rotate-45' : ''}`}
+                        style={{ 
+                            width: size,
+                            height: size,
+                            backgroundColor: colorStr,
+                            boxShadow: (poi.type === 'dragon' || poi.type === 'item' || poi.type === 'bat') ? `0 0 10px ${colorStr}` : 'none',
+                            transform: 'translate(-50%, -50%)',
+                            border: opacity > 0.5 ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                            borderRadius: borderRadius,
+                            zIndex: isOffscreen ? 10 : 5
+                        }}
+                    >
+                        {isOffscreen && (
+                            <div 
+                                className="absolute inset-0 border border-white rounded-full animate-ping"
+                                style={{ borderColor: colorStr }}
+                            />
+                        )}
+                    </motion.div>
+                );
+            })}
         </>
     );
 };
@@ -53,7 +104,7 @@ export const Minimap = () => {
     };
 
     return (
-        <div className="bg-black/60 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl w-48 h-48 overflow-hidden relative pointer-events-none group">
+        <div className="acheron-panel p-2 w-48 h-48 overflow-hidden relative pointer-events-none group">
             {/* Grid Lines (Rooms of 60 units = 120px) */}
             <div 
                 className="absolute inset-0 opacity-20 z-0"
@@ -65,9 +116,7 @@ export const Minimap = () => {
             />
 
             {/* Scanlines Effect */}
-            <div className="absolute inset-0 z-30 opacity-20 pointer-events-none overflow-hidden rounded-2xl">
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
-            </div>
+            <div className="absolute inset-0 z-30 opacity-20 pointer-events-none rounded-2xl acheron-scanner-glass" />
 
             {/* Radar Sweep Effect */}
             <motion.div 
@@ -117,13 +166,13 @@ export const Minimap = () => {
             <div className="absolute top-2 right-2 flex gap-1 z-40">
                 <button 
                     onClick={toggleMute}
-                    className="p-1.5 bg-black/40 hover:bg-black/80 border border-white/10 rounded-lg pointer-events-auto transition-all active:scale-95"
+                    className="acheron-button-small"
                 >
-                    {isMuted ? <VolumeX className="w-3 h-3 text-red-400" /> : <Volume2 className="w-3 h-3 text-emerald-400" />}
+                    {isMuted ? <VolumeX className="w-3 h-3 text-red-400" /> : <Volume2 className="w-3 h-3" />}
                 </button>
             </div>
 
-            <div className="absolute bottom-2 left-2 text-[8px] font-black uppercase tracking-widest text-emerald-400 animate-pulse">Scanner Active: P.A.S. v4.2</div>
+            <div className="absolute bottom-2 left-2 text-biometric text-[8px] animate-pulse">Scanner Active: P.A.S. v4.2</div>
         </div>
     );
 };
