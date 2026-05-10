@@ -20,6 +20,8 @@ export class Game {
   player: Player;
   dragons: DragonSystem;
   cloudBat: CloudBat;
+  ambient: THREE.AmbientLight;
+  dirLight: THREE.DirectionalLight;
   lastTime: number = performance.now();
   fpsLastTime: number = performance.now();
   frames: number = 0;
@@ -66,10 +68,10 @@ export class Game {
   }
 
   private initLights() {
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-    dir.position.set(50, 100, 50);
-    this.scene.add(ambient, dir);
+    this.ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    this.dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    this.dirLight.position.set(50, 100, 50);
+    this.scene.add(this.ambient, this.dirLight);
   }
 
   private setupEvents() {
@@ -103,7 +105,7 @@ export class Game {
     this.frames++;
     this.updateDebugStats(now);
 
-    if (!GameState.isInitialized) return;
+    if (!GameState.isInitialized || GameState.isPaused) return;
 
     this.player.update(dt);
     this.dragons.update(dt);
@@ -167,6 +169,12 @@ export class Game {
   }
 
   private render() {
+    // Dynamic Lighting based on zone
+    const isOutdoor = GameState.isOutdoor;
+    this.ambient.intensity = THREE.MathUtils.lerp(this.ambient.intensity, isOutdoor ? 0.6 : 0.05, 0.1);
+    this.dirLight.intensity = THREE.MathUtils.lerp(this.dirLight.intensity, isOutdoor ? 0.8 : 0.05, 0.1);
+    this.scene.background = new THREE.Color(isOutdoor ? 0x87ceeb : 0x000000);
+
     this.camera.position.x = this.player.mesh.position.x + _camOffset.x;
     this.camera.position.y = this.player.mesh.position.y + _camOffset.y;
     this.camera.position.z = this.player.mesh.position.z + _camOffset.z;

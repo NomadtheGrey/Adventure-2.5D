@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Game } from './game/main';
 import { Minimap } from './components/Minimap';
 import { TelemetryDisplay } from './components/TelemetryDisplay';
-import { TitleCard, GearDisplay, Compass } from './components/StatusBars';
+import { TitleCard, GearDisplay, Compass, SignalIntegrityBar } from './components/StatusBars';
 import { InventoryBar, ControlsHint } from './components/InventoryBar';
 import { Overlays } from './components/Overlays';
+import { OnboardingBriefing } from './components/OnboardingBriefing';
 import { DebugPanel } from './components/DebugPanel';
 import { PauseMenu } from './components/PauseMenu';
 import { Audio } from './game/AudioSystem';
@@ -24,6 +25,7 @@ export default function App() {
         if (e.key === 'Escape' && GameState.isInitialized && !GameState.isDead && !GameState.hasWon) {
             GameState.isPaused = !GameState.isPaused;
             Audio.playUIClick();
+            setTick(t => t + 1);
         }
     };
 
@@ -53,11 +55,13 @@ export default function App() {
       <div className="absolute top-0 left-0 w-full p-8 pointer-events-none flex justify-between items-start z-10">
         <div className="flex flex-col gap-4">
             <TitleCard />
+            <SignalIntegrityBar />
             <Minimap />
             <TelemetryDisplay />
         </div>
-
       </div>
+
+      <OnboardingBriefing />
 
       {/* Bottom UI */}
       <InventoryBar />

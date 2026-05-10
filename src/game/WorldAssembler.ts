@@ -39,17 +39,17 @@ export class WorldAssembler {
         if (isOuter) {
             const gateDist = 20; 
             if (rz === 0 && rx === mid) {
-                this.assetManager.createCastle(x, z, 0xffd700, 'N');
+                this.assetManager.createCastle(x, z, 0xffd700, 'N', ItemType.KEY_GOLD);
                 this.world.spawnGateAt(ItemType.KEY_GOLD, new THREE.Vector3(x, 2, z + gateDist)); 
                 return;
             }
             if (rx === 0 && rz === mid) {
-                this.assetManager.createCastle(x, z, 0x111111, 'W');
+                this.assetManager.createCastle(x, z, 0x111111, 'W', ItemType.KEY_BLACK);
                 this.world.spawnGateAt(ItemType.KEY_BLACK, new THREE.Vector3(x + gateDist, 2, z)); 
                 return;
             }
             if (rx === this.gridSize - 1 && rz === mid) {
-                this.assetManager.createCastle(x, z, 0xc0c0c0, 'E');
+                this.assetManager.createCastle(x, z, 0xc0c0c0, 'E', ItemType.KEY_SILVER);
                 this.world.spawnGateAt(ItemType.KEY_SILVER, new THREE.Vector3(x - gateDist, 2, z)); 
                 return;
             }

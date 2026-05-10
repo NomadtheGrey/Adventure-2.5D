@@ -27,6 +27,7 @@ export class ReactionSystem {
                 if (userData.isExit) {
                     state.message = "EXITING CASTLE";
                     state.messageTimer = 1.5;
+                    state.isOutdoor = true;
                     const target = userData.targetName;
                     if (target === 'NORTH_CASTLE') player.mesh.position.set(0, 2, -285);
                     else if (target === 'SOUTH_CASTLE') player.mesh.position.set(0, 2, 285);
@@ -34,13 +35,23 @@ export class ReactionSystem {
                     else if (target === 'WEST_CASTLE') player.mesh.position.set(-285, 2, 0);
                     Audio.playPhase();
                 } else if (userData.isInteriorTrigger) {
-                    state.message = "ENTERED HALL";
-                    state.messageTimer = 1.5;
-                    const type = userData.castleType;
-                    if (type === 'N') player.mesh.position.set(5000, 2, -4950);
-                    else if (type === 'W') player.mesh.position.set(-8000, 2, 50);
-                    else if (type === 'E') player.mesh.position.set(8000, 2, 50);
-                    Audio.playPhase();
+                    const reqKey = userData.keyType as ItemType;
+                    const hasKey = state.inventory.some(k => k.type === reqKey);
+                    
+                    if (hasKey) {
+                        state.message = "ENTERED HALL";
+                        state.messageTimer = 1.5;
+                        state.isOutdoor = false;
+                        const type = userData.castleType;
+                        // Spawn with offset to avoid maze walls at (0,0) relative to interior
+                        if (type === 'N') player.mesh.position.set(5000, 2, -4950);
+                        else if (type === 'W') player.mesh.position.set(-8000 + 10, 2, 50 + 10);
+                        else if (type === 'E') player.mesh.position.set(8000 + 10, 2, 50 + 10);
+                        Audio.playPhase();
+                    } else {
+                        state.message = `YOU NEED THE ${reqKey.replace('KEY_', '')} KEY`;
+                        state.messageTimer = 2;
+                    }
                 } else if (userData.isThrone) {
                     if (state.inventory.some(i => i.type === ItemType.CHALICE)) {
                         state.message = "CHALICE RETURNED! YOU WIN!";
@@ -92,6 +103,7 @@ export class ReactionSystem {
 
             case 'DIE':
                 Audio.playDie();
+                state.signalIntegrity = 0;
                 state.isDead = true;
                 break;
         }

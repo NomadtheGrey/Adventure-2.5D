@@ -83,8 +83,8 @@ export class WorldAssetManager {
         this.addToGrid(obj);
     }
 
-    public createCastle(x: number, z: number, color: number, orientation: 'N' | 'S' | 'E' | 'W') {
-        this.castleBuilder.createCastle(x, z, color, orientation);
+    public createCastle(x: number, z: number, color: number, orientation: 'N' | 'S' | 'E' | 'W', keyType: ItemType) {
+        this.castleBuilder.createCastle(x, z, color, orientation, keyType);
     }
 
     public createCastleInterior(x: number, z: number, color: number, name: string) {

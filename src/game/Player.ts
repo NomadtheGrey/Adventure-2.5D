@@ -9,6 +9,7 @@ const _moveVector = new THREE.Vector3();
 export class Player {
   mesh: THREE.Group;
   spear: THREE.Mesh;
+  interiorLight: THREE.PointLight;
   itemContainer: THREE.Group;
   itemMeshes: Record<string, THREE.Mesh> = {};
   scene: THREE.Scene;
@@ -29,6 +30,11 @@ export class Player {
     this.initVisuals();
     this.initItemVisuals();
     this.mesh.add(this.itemContainer);
+
+    this.interiorLight = new THREE.PointLight(0xffffff, 0, 35);
+    this.interiorLight.position.y = 3;
+    this.mesh.add(this.interiorLight);
+
     this.scene.add(this.mesh);
     this.setupInput();
   }
@@ -214,6 +220,9 @@ export class Player {
     GameState.isMoving = velocity > 0.01;
     GameState.movingSpeed = velocity;
     GameState.isOutdoor = GameState.currentZone === 'SECTOR';
+    
+    // Adjust interior spotlight
+    this.interiorLight.intensity = GameState.isOutdoor ? 0 : 25;
   }
 
   private normalizeAngle(angle: number): number {

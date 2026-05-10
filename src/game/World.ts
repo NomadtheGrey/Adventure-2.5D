@@ -109,13 +109,23 @@ export class World {
   }
 
   public removeFromGrid(obj: WorldObject) {
-    const x = Math.floor(obj.mesh.position.x / this.cellSize);
-    const z = Math.floor(obj.mesh.position.z / this.cellSize);
-    const key = `${x},${z}`;
-    const cell = this.spatialGrid.get(key);
-    if (cell) {
-        const idx = cell.indexOf(obj);
-        if (idx !== -1) cell.splice(idx, 1);
+    // Robust removal: check current position cell and surrounding cells just in case
+    // (though in theory items shouldn't drift in X/Z)
+    const cx = Math.floor(obj.mesh.position.x / this.cellSize);
+    const cz = Math.floor(obj.mesh.position.z / this.cellSize);
+    
+    for (let x = cx - 1; x <= cx + 1; x++) {
+        for (let z = cz - 1; z <= cz + 1; z++) {
+            const key = `${x},${z}`;
+            const cell = this.spatialGrid.get(key);
+            if (cell) {
+                const idx = cell.indexOf(obj);
+                if (idx !== -1) {
+                    cell.splice(idx, 1);
+                    return; // Found and removed
+                }
+            }
+        }
     }
   }
 

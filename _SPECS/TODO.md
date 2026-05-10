@@ -45,6 +45,9 @@ Aesthetic
 - [ ] **Artifact Cages:** Rotating wireframe cages for artifacts. (Implemented for Items in interiors)
 
 ## PHASE 4: THE DEEP DATA (SECRET ROOM)
+- [x] **Signal Integrity Refactor:** Rename "Hull/Health" to "Signal Integrity" across all systems and UI. (Completed: 2026-05-10)
+- [x] **Mission Briefing UI:** Implement a modal or first-load overlay based on `PLAYER_GUIDE.md`. (Completed: 2026-05-10)
+- [x] **Locked Castles:** Secure castle entrances with mandatory key checks and flashlight systems. (Completed: 2026-05-10)
 - [ ] **Technical Secret:** The "Secret Dot" hidden in a wall.
 - [ ] **Wireframe Mode:** 'Underworld' render mode toggle.
 

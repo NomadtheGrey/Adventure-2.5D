@@ -21,7 +21,7 @@ The dragons are "Security Daemons" patrolling the memory sectors:
 The Surveyor's interface is a high-latency projection:
 *   **The holographic list (HUD-L):** Active systems (Inventory) are managed via a vertical holographic list on the left flank. Each module includes a diagnostic ID and secondary status descriptor.
 *   **The Scanner (HUD-R):** A top-down projection of the immediate memory sector with fixed North orientation.
-*   **The Bio-Link:** Health and status are monitored via the central telemetry ring.
+*   **Signal Integrity:** Formerly health. Measures the stability of the neural connection. 0% = Signal Loss.
 *   **Telemetry Audio (Implemented):** Pulse-hum feedback intensifies as you leave the protection of the Landing Cradle or approach a Security Daemon.
 
 ## 5. RECONNAISSANCE PROTOCOLS

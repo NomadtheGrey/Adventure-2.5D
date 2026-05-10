@@ -7,7 +7,30 @@ export const TitleCard = () => {
     return (
         <div className="acheron-panel p-5 pointer-events-none">
             <h1 className="acheron-header">Adventure 2.5D</h1>
-            <p className="text-telemetry opacity-40">Modernized Isometric Atari Classic</p>
+            <p className="text-telemetry opacity-40 italic mt-1 font-bold">1980 Adventure Protocol // Reconstruction</p>
+        </div>
+    );
+};
+
+export const SignalIntegrityBar = () => {
+    const integrity = GameState.signalIntegrity;
+    const color = integrity > 0.3 ? 'bg-emerald-500' : 'bg-red-500';
+    
+    return (
+        <div className="acheron-panel p-4 min-w-[200px] pointer-events-none border-l-4 border-l-emerald-500">
+            <div className="flex justify-between items-center mb-2">
+                <span className="acheron-label">Signal Integrity</span>
+                <span className={`font-mono text-xs ${integrity > 0.3 ? 'text-emerald-400' : 'text-red-400 animate-pulse'}`}>
+                    {(integrity * 100).toFixed(0)}%
+                </span>
+            </div>
+            <div className="h-1 bg-black/40 overflow-hidden">
+                <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${integrity * 100}%` }}
+                    className={`h-full ${color} shadow-[0_0_10px_rgba(16,185,129,0.5)]`}
+                />
+            </div>
         </div>
     );
 };

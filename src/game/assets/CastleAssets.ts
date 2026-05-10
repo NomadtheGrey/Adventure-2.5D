@@ -10,7 +10,7 @@ export class CastleAssets {
         private addToGrid: (obj: WorldObject) => void
     ) {}
 
-    public createCastle(x: number, z: number, color: number, orientation: 'N' | 'S' | 'E' | 'W') {
+    public createCastle(x: number, z: number, color: number, orientation: 'N' | 'S' | 'E' | 'W', keyType: ItemType) {
         const wallMat = new THREE.MeshPhongMaterial({ 
             color: 0x111111,
             emissive: color,
@@ -81,7 +81,7 @@ export class CastleAssets {
 
         const trigger = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshBasicMaterial({ visible: false }));
         trigger.position.set(x, 5, z);
-        trigger.userData = { castleType: orientation, isInteriorTrigger: true };
+        trigger.userData = { castleType: orientation, isInteriorTrigger: true, keyType };
         
         const obj: WorldObject = { 
             id: `trigger-${orientation}-${Math.random()}`, 
@@ -118,9 +118,14 @@ export class CastleAssets {
             mesh.position.set(x + w.ox, 15, z + w.oz);
             this.registerStatic(mesh);
             if (i === 1) {
-                const exitGate = new THREE.Mesh(new THREE.BoxGeometry(12, 12, 2), new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 1.0 }));
+                const exitGate = new THREE.Mesh(new THREE.BoxGeometry(12, 12, 2), new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 2.0 }));
                 exitGate.position.set(x, 6, z + w.oz - 2);
                 exitGate.userData = { isExit: true, targetName: name };
+                
+                const exitLight = new THREE.PointLight(color, 20, 30);
+                exitLight.position.set(0, 0, -2);
+                exitGate.add(exitLight);
+                
                 const obj: WorldObject = { id: `exit-${name}-${Math.random()}`, mesh: exitGate, isStatic: true, type: 'gate' };
                 this.objects.push(obj);
                 this.addToGrid(obj);

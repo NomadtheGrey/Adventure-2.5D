@@ -6,6 +6,7 @@ import { Volume2, VolumeX, Settings, X, Power, ShieldAlert, Eye, EyeOff } from '
 
 export const PauseMenu = () => {
     const isPaused = GameState.isPaused;
+    const isBriefing = GameState.showBriefing;
     const [, setTick] = React.useState(0);
 
     const toggleMute = () => {
@@ -21,13 +22,22 @@ export const PauseMenu = () => {
     };
 
     const resume = () => {
+        if (isBriefing) return;
         GameState.isPaused = false;
         Audio.playUIClick();
+        setTick(t => t + 1);
+    };
+
+    const showBriefing = () => {
+        GameState.showBriefing = true;
+        GameState.isPaused = false;
+        Audio.playUIClick();
+        setTick(t => t + 1);
     };
 
     return (
         <AnimatePresence>
-            {isPaused && (
+            {(isPaused && !isBriefing) && (
                 <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -121,6 +131,14 @@ export const PauseMenu = () => {
                                 />
                              </div>
                         </div>
+
+                        <button 
+                            onClick={showBriefing}
+                            className="flex items-center justify-center gap-3 p-4 bg-white/5 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/10 transition-all text-emerald-400 group"
+                        >
+                            <ShieldAlert className="w-5 h-5 group-hover:animate-pulse" />
+                            <span className="text-xs font-black uppercase tracking-widest">Access Mission Briefing</span>
+                        </button>
 
                         <button 
                             onClick={resume}

@@ -3,15 +3,16 @@ import { GameState } from '../GameState';
 export class TelemetrySystem {
     private static maxLogs = 5;
     private static backgroundTraces = [
-        "ADAPTATION TRACE: STABLE",
-        "NEURAL BUFFER: 88%",
-        "MEMETIC FRAGMENT DETECTED",
+        "ADAPTATION TRACE: SYNCING",
+        "NEURAL BUFFER: STABLE",
+        "MEMETIC FRAGMENT: 1980 PROTOCOL",
         "SIGNAL RADIANCE: HIGH",
         "RECURSIVE DEPTH: 12",
         "BUFFER SYNC: SUCCESS",
-        "LATENCY OPTIMIZED",
-        "DATA MIST: EVAPORATED",
-        "CORE TEMP: NOMINAL"
+        "LORE_ID: SECTOR_ZERO",
+        "QUANTUM FLUCTUATIONS DETECTED",
+        "CORE TEMP: NOMINAL",
+        "SYNCHRONIZATION: 100%"
     ];
 
     public static log(text: string) {

@@ -48,6 +48,8 @@ export interface GameStateData {
   isOutdoor: boolean;
   isInitialized: boolean;
   hasWon: boolean;
+  signalIntegrity: number;
+  showBriefing: boolean;
   currentZone: 'LANDING' | 'SECTOR';
   worldSeed: number;
   pois: POI[];
@@ -92,6 +94,8 @@ export const GameState: GameStateData = {
   isOutdoor: false,
   isInitialized: false,
   hasWon: false,
+  signalIntegrity: 1.0,
+  showBriefing: true,
   currentZone: 'LANDING',
   worldSeed: Math.random(),
   pois: [],
