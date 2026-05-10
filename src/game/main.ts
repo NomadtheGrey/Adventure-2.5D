@@ -142,6 +142,7 @@ export class Game {
 
     const nearby = this.world.getNearby(this.player.mesh.position, 80);
     const objectPois = nearby
+        .filter(obj => !obj.isCollected)
         .map((obj) => {
             let color = 0xffffff;
             if (obj.type === 'item') color = 0xff00ff;
@@ -171,9 +172,9 @@ export class Game {
   private render() {
     // Dynamic Lighting based on zone
     const isOutdoor = GameState.isOutdoor;
-    this.ambient.intensity = THREE.MathUtils.lerp(this.ambient.intensity, isOutdoor ? 0.6 : 0.05, 0.1);
-    this.dirLight.intensity = THREE.MathUtils.lerp(this.dirLight.intensity, isOutdoor ? 0.8 : 0.05, 0.1);
-    this.scene.background = new THREE.Color(isOutdoor ? 0x87ceeb : 0x000000);
+    this.ambient.intensity = THREE.MathUtils.lerp(this.ambient.intensity, isOutdoor ? 0.6 : 0.2, 0.1);
+    this.dirLight.intensity = THREE.MathUtils.lerp(this.dirLight.intensity, isOutdoor ? 0.8 : 0.1, 0.1);
+    this.scene.background = new THREE.Color(isOutdoor ? 0x87ceeb : 0x010101);
 
     this.camera.position.x = this.player.mesh.position.x + _camOffset.x;
     this.camera.position.y = this.player.mesh.position.y + _camOffset.y;

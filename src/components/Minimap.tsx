@@ -93,6 +93,17 @@ const MinimapMarkers = () => {
 
 export const Minimap = () => {
     const [isMuted, setIsMuted] = useState(GameState.audio.isRadarMuted);
+    const [, setTick] = useState(0);
+
+    React.useEffect(() => {
+        let frame: number;
+        const sync = () => {
+            setTick(t => t + 1);
+            frame = requestAnimationFrame(sync);
+        };
+        sync();
+        return () => cancelAnimationFrame(frame);
+    }, []);
 
     if (!GameState.hud.showMinimap) return null;
 

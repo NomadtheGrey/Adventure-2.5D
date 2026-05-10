@@ -10,6 +10,7 @@ export interface WorldObject {
   id: string;
   mesh: THREE.Object3D;
   isStatic: boolean;
+  isCollected?: boolean;
   type: 'wall' | 'tree' | 'item' | 'gate' | 'bush' | 'water' | 'throne';
 }
 
@@ -150,7 +151,9 @@ export class World {
       if (!mainWorldItems.includes(type)) return;
       
       let finalPos = new THREE.Vector3(item.pos.x, item.pos.y, item.pos.z);
-      if (type === ItemType.BRIDGE) {
+      if (type === ItemType.KEY_SILVER) {
+        finalPos.set(-5, 1, -5); // Fixed location in landing sector
+      } else if (type === ItemType.BRIDGE) {
         finalPos.set(5, 1, 5); 
       } else {
         let safe = false;

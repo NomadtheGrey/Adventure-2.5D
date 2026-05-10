@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GameState } from '../game/GameState';
 import { InventorySystem } from '../game/InventorySystem';
@@ -13,6 +14,18 @@ export const TitleCard = () => {
 };
 
 export const SignalIntegrityBar = () => {
+    const [, setTick] = useState(0);
+    
+    useEffect(() => {
+        let frame: number;
+        const sync = () => {
+            setTick(t => t + 1);
+            frame = requestAnimationFrame(sync);
+        };
+        sync();
+        return () => cancelAnimationFrame(frame);
+    }, []);
+
     const integrity = GameState.signalIntegrity;
     const color = integrity > 0.3 ? 'bg-emerald-500' : 'bg-red-500';
     
@@ -36,6 +49,18 @@ export const SignalIntegrityBar = () => {
 };
 
 export const GearDisplay = () => {
+    const [, setTick] = useState(0);
+    
+    useEffect(() => {
+        let frame: number;
+        const sync = () => {
+            setTick(t => t + 1);
+            frame = requestAnimationFrame(sync);
+        };
+        sync();
+        return () => cancelAnimationFrame(frame);
+    }, []);
+
     const activeItem = InventorySystem.getActiveItem();
     return (
         <div className="acheron-panel p-5 flex flex-col gap-3 min-w-[200px] pointer-events-none">
@@ -67,17 +92,31 @@ export const GearDisplay = () => {
     );
 };
 
-export const Compass = () => (
-    <div className="acheron-panel rounded-full w-24 h-24 flex items-center justify-center relative pointer-events-none">
-        <motion.div 
-            animate={{ rotate: (GameState.playerRotation - Math.PI) * (180/Math.PI) }}
-            className="w-16 h-16 border-2 border-emerald-400/20 rounded-full flex items-center justify-center italic font-black text-xs text-white/40"
-        >
-            <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[8px] text-emerald-400">N</span>
-            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[8px]">S</span>
-            <span className="absolute -left-1 top-1/2 -translate-y-1/2 text-[8px]">W</span>
-            <span className="absolute -right-1 top-1/2 -translate-y-1/2 text-[8px]">E</span>
-            <div className="w-[1px] h-10 bg-emerald-400 shadow-[0_0_5px_#34d399]" />
-        </motion.div>
-    </div>
-);
+export const Compass = () => {
+    const [, setTick] = useState(0);
+    
+    useEffect(() => {
+        let frame: number;
+        const sync = () => {
+            setTick(t => t + 1);
+            frame = requestAnimationFrame(sync);
+        };
+        sync();
+        return () => cancelAnimationFrame(frame);
+    }, []);
+
+    return (
+        <div className="acheron-panel rounded-full w-24 h-24 flex items-center justify-center relative pointer-events-none">
+            <motion.div 
+                animate={{ rotate: (GameState.playerRotation - Math.PI) * (180/Math.PI) }}
+                className="w-16 h-16 border-2 border-emerald-400/20 rounded-full flex items-center justify-center italic font-black text-xs text-white/40"
+            >
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[8px] text-emerald-400">N</span>
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[8px]">S</span>
+                <span className="absolute -left-1 top-1/2 -translate-y-1/2 text-[8px]">W</span>
+                <span className="absolute -right-1 top-1/2 -translate-y-1/2 text-[8px]">E</span>
+                <div className="w-[1px] h-10 bg-emerald-400 shadow-[0_0_5px_#34d399]" />
+            </motion.div>
+        </div>
+    );
+};

@@ -29,6 +29,7 @@ export class CollisionSystem {
         const canPhase = activeItem?.type === ItemType.BRIDGE;
 
         nearby.forEach(obj => {
+            if (obj.isCollected) return;
             _objBox.setFromObject(obj.mesh);
             if (!_playerBox.intersectsBox(_objBox)) return;
 

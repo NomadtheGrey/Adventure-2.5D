@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Game } from './game/main';
 import { Minimap } from './components/Minimap';
 import { TelemetryDisplay } from './components/TelemetryDisplay';
@@ -31,15 +31,13 @@ export default function App() {
 
     window.addEventListener('keydown', handleKey);
 
-    // We wait for user interaction to start audio (browser policy)
-    let frame: number;
-    const sync = () => {
-      setTick(t => t + 1);
-      frame = requestAnimationFrame(sync);
-    };
-    sync();
+    // Minor refresh for global transitions
+    const interval = setInterval(() => {
+        if (!GameState.isInitialized) setTick(t => t + 1);
+    }, 100);
+
     return () => {
-        cancelAnimationFrame(frame);
+        clearInterval(interval);
         window.removeEventListener('keydown', handleKey);
     };
   }, []);

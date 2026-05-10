@@ -31,8 +31,9 @@ export class Player {
     this.initItemVisuals();
     this.mesh.add(this.itemContainer);
 
-    this.interiorLight = new THREE.PointLight(0xffffff, 0, 35);
-    this.interiorLight.position.y = 3;
+    this.interiorLight = new THREE.PointLight(0xffffff, 0, 50);
+    this.interiorLight.decay = 1.5;
+    this.interiorLight.position.y = 4;
     this.mesh.add(this.interiorLight);
 
     this.scene.add(this.mesh);
@@ -222,7 +223,7 @@ export class Player {
     GameState.isOutdoor = GameState.currentZone === 'SECTOR';
     
     // Adjust interior spotlight
-    this.interiorLight.intensity = GameState.isOutdoor ? 0 : 25;
+    this.interiorLight.intensity = GameState.isOutdoor ? 0 : 60;
   }
 
   private normalizeAngle(angle: number): number {

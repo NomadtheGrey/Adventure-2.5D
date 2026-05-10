@@ -13,6 +13,9 @@ export class ReactionSystem {
         switch (event.type) {
             case 'COLLECT':
                 if (performance.now() - state.lastDropTime < 1000) break;
+                if (event.target.isCollected) break;
+                
+                event.target.isCollected = true;
                 const itemType = event.target.mesh.userData.itemType as ItemType;
                 const itemDef = ITEMS[itemType];
                 state.message = `PICKED UP: ${itemDef ? itemDef.name.toUpperCase() : itemType}`;
