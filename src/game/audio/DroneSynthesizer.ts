@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GameState, GameStateData } from '../GameState';
 
 export class DroneSynthesizer {
-    private drones: { osc: OscillatorNode, gain: GainNode }[] = [];
+    private drones: { osc: OscillatorNode, gain: GainNode, baseFreq: number, baseVol: number }[] = [];
     private isolationSine: OscillatorNode | null = null;
     private groundingHum: { osc: OscillatorNode, gain: GainNode } | null = null;
     private windFilter: BiquadFilterNode | null = null;
@@ -14,14 +14,16 @@ export class DroneSynthesizer {
         if (this.ambientActive) return;
         this.ambientActive = true;
 
-        this.createDrone(32.7, 0.12, 'sine'); // Low C
-        this.createDrone(49.0, 0.04, 'sine'); // Low G
+        this.createDrone(32.7, 0.6, 'sine'); // Low C
+        this.createDrone(49.0, 0.3, 'sine'); // Low G
+        this.createDrone(130.81, 0.2, 'sine'); // Mid C
+        this.createDrone(196.00, 0.15, 'sine'); // Mid G
         
         const resonance = this.ctx.createOscillator();
         const resGain = this.ctx.createGain();
         resonance.type = 'sawtooth';
         resonance.frequency.value = 60;
-        resGain.gain.value = 0.01;
+        resGain.gain.value = 0.04;
         
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'lowpass';
@@ -48,28 +50,34 @@ export class DroneSynthesizer {
     }
 
     private createDrone(freq: number, vol: number, type: OscillatorType) {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        gain.gain.value = vol;
-        osc.connect(gain);
-        gain.connect(this.masterBus);
-        osc.start();
-        this.drones.push({ osc, gain });
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.value = vol;
+            osc.connect(gain);
+            gain.connect(this.masterBus);
+            osc.start();
+            this.drones.push({ osc, gain, baseFreq: freq, baseVol: vol });
+        } catch (e) {
+            console.error("DroneSynthesizer: createDrone failed", e);
+        }
     }
 
     private startIsolation() {
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
+        const freq = 220;
+        const vol = 0.005;
         osc.type = 'sine';
-        osc.frequency.value = 220;
-        gain.gain.value = 0.005;
+        osc.frequency.value = freq;
+        gain.gain.value = vol;
         osc.connect(gain);
         gain.connect(this.masterBus);
         osc.start();
         this.isolationSine = osc;
-        this.drones.push({ osc, gain });
+        this.drones.push({ osc, gain, baseFreq: freq, baseVol: vol });
     }
 
     private startGrounding() {
@@ -196,13 +204,10 @@ export class DroneSynthesizer {
 
         const jitterIntensity = maxThreat * 50; 
         
-        this.drones.forEach((d, i) => {
-            const isIsolation = d.osc === this.isolationSine;
-            const baseFreq = isIsolation ? 220 : (i === 0 ? 32.7 : 49.0);
-            d.osc.frequency.setTargetAtTime(baseFreq + sectorDissonance, this.ctx.currentTime, 2.0);
+        this.drones.forEach((d) => {
+            d.osc.frequency.setTargetAtTime(d.baseFreq + sectorDissonance, this.ctx.currentTime, 2.0);
 
-            const baseVol = isIsolation ? 0.005 : (i === 0 ? 0.08 : 0.04);
-            const targetVol = baseVol * (0.8 + maxThreat * 3);
+            const targetVol = d.baseVol * (0.8 + maxThreat * 3);
             d.gain.gain.setTargetAtTime(targetVol, this.ctx.currentTime, 0.5);
             
             if (maxThreat > 0.4) {

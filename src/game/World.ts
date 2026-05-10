@@ -23,16 +23,20 @@ export class World {
   gridSize = 11;
 
   private assetManager!: WorldAssetManager;
+  private worldGroup: THREE.Group;
+  private interiorGroup: THREE.Group;
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, worldGroup: THREE.Group, interiorGroup: THREE.Group) {
     this.scene = scene;
+    this.worldGroup = worldGroup;
+    this.interiorGroup = interiorGroup;
     this.init();
   }
 
   private init() {
     this.createFloor();
     
-    this.assetManager = new WorldAssetManager(this.scene, this.objects, (obj) => this.addToGrid(obj));
+    this.assetManager = new WorldAssetManager(this.scene, this.worldGroup, this.interiorGroup, this.objects, (obj) => this.addToGrid(obj));
     const assembler = new WorldAssembler(this.scene, this.assetManager, this.gridSize, this.roomSize, this);
     
     assembler.generate();
@@ -67,7 +71,7 @@ export class World {
         mesh.rotation.y += 0.04;
     };
 
-    this.scene.add(mesh);
+    this.worldGroup.add(mesh);
     const obj: WorldObject = { id: `item-${type}-${Math.random()}`, mesh, isStatic: false, type: 'item' };
     this.objects.push(obj);
     this.addToGrid(obj);
@@ -78,10 +82,14 @@ export class World {
     gateGroup.position.copy(pos);
     gateGroup.userData = { keyType };
 
-    this.scene.add(gateGroup);
+    this.worldGroup.add(gateGroup);
     const obj: WorldObject = { id: `gate-${keyType}-${Math.random()}`, mesh: gateGroup, isStatic: true, type: 'gate' };
     this.objects.push(obj);
     this.addToGrid(obj);
+  }
+
+  public updateZones() {
+    this.assetManager.updateZones();
   }
 
   public addToGrid(obj: WorldObject) {
@@ -94,6 +102,11 @@ export class World {
     cell.push(obj);
   }
 
+  /**
+   * SPATIAL GRID SYSTEM
+   * Efficiently retrieves objects near a position to avoid checking far-away entities.
+   * Used for collisions and HUD markers.
+   */
   public getNearby(pos: THREE.Vector3, radius: number): WorldObject[] {
     const cx = Math.floor(pos.x / this.cellSize);
     const cz = Math.floor(pos.z / this.cellSize);
@@ -111,7 +124,6 @@ export class World {
 
   public removeFromGrid(obj: WorldObject) {
     // Robust removal: check current position cell and surrounding cells just in case
-    // (though in theory items shouldn't drift in X/Z)
     const cx = Math.floor(obj.mesh.position.x / this.cellSize);
     const cz = Math.floor(obj.mesh.position.z / this.cellSize);
     
@@ -123,11 +135,15 @@ export class World {
                 const idx = cell.indexOf(obj);
                 if (idx !== -1) {
                     cell.splice(idx, 1);
-                    return; // Found and removed
+                    break;
                 }
             }
         }
     }
+
+    // Also prune from master objects list
+    const mainIdx = this.objects.indexOf(obj);
+    if (mainIdx !== -1) this.objects.splice(mainIdx, 1);
   }
 
   private createFloor() {
@@ -137,7 +153,7 @@ export class World {
         new THREE.MeshLambertMaterial({ color: 0xffffff, map: texture })
     );
     floor.rotation.x = -Math.PI / 2;
-    this.scene.add(floor);
+    this.worldGroup.add(floor);
   }
 
   private spawnItems() {

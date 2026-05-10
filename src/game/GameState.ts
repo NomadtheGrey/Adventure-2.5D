@@ -26,7 +26,7 @@ export interface GateInfo {
 
 export interface POI {
   id: string;
-  type: 'dragon' | 'item' | 'wall' | 'gate' | 'bush' | 'tree' | 'water' | 'bat';
+  type: 'dragon' | 'item' | 'wall' | 'gate' | 'bush' | 'tree' | 'water' | 'bat' | 'throne';
   pos: Vector3;
   color: HexColor;
 }
@@ -50,7 +50,8 @@ export interface GameStateData {
   hasWon: boolean;
   signalIntegrity: number;
   showBriefing: boolean;
-  currentZone: 'LANDING' | 'SECTOR';
+  currentZone: 'LANDING' | 'SECTOR' | 'SILVER_CASTLE' | 'EAST_CASTLE' | 'NORTH_CASTLE' | 'WEST_CASTLE';
+  activeInterior: string | null;
   worldSeed: number;
   pois: POI[];
   gates: GateInfo[];
@@ -91,12 +92,13 @@ export const GameState: GameStateData = {
   intentToDrop: false,
   isMoving: false,
   movingSpeed: 0,
-  isOutdoor: false,
+  isOutdoor: true,
   isInitialized: false,
   hasWon: false,
   signalIntegrity: 1.0,
   showBriefing: true,
   currentZone: 'LANDING',
+  activeInterior: null,
   worldSeed: Math.random(),
   pois: [],
   gates: [],

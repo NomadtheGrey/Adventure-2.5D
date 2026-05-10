@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { WorldObject } from '../World';
-import { ItemType } from '../GameState';
+import { GameState, ItemType } from '../GameState';
 import { ItemAssets } from './ItemAssets';
 
 export class CastleAssets {
     constructor(
-        private scene: THREE.Scene,
+        private scene: THREE.Object3D,
         private objects: WorldObject[],
         private addToGrid: (obj: WorldObject) => void
     ) {}
@@ -91,112 +91,136 @@ export class CastleAssets {
         this.addToGrid(obj);
     }
 
+    private castleGroups: Record<string, THREE.Group> = {};
+
     public createCastleInterior(x: number, z: number, color: number, name: string) {
-        let wallBaseColor = 0x000000, floorBaseColor = 0x111111, emissiveInt = 0.2;
-        if (name === 'EAST_CASTLE') { wallBaseColor = 0x222222; floorBaseColor = 0x333333; emissiveInt = 0.4; }
-        else if (name === 'NORTH_CASTLE') { wallBaseColor = 0x332200; floorBaseColor = 0x332200; emissiveInt = 0.5; }
+        // Create a dedicated group for this interior map to isolate rendering
+        const interiorGroup = new THREE.Group();
+        interiorGroup.visible = false;
+        this.castleGroups[name] = interiorGroup;
+        this.scene.add(interiorGroup);
 
-        const floorMat = new THREE.MeshPhongMaterial({ color: floorBaseColor });
-        const wallMat = new THREE.MeshPhongMaterial({ color: wallBaseColor, emissive: color, emissiveIntensity: emissiveInt });
+        // Castle-specific color themes for variety - Darker bases for better item contrast
+        let wallBaseColor = 0x222222, floorBaseColor = 0x111111, emissiveInt = 0.2;
+        if (name === 'EAST_CASTLE') { wallBaseColor = 0x332222; }
+        else if (name === 'NORTH_CASTLE') { wallBaseColor = 0x223322; }
+        else if (name === 'WEST_CASTLE') { wallBaseColor = 0x222233; }
 
+        const floorMat = new THREE.MeshLambertMaterial({ color: floorBaseColor });
+        const wallMat = new THREE.MeshLambertMaterial({ 
+            color: wallBaseColor, 
+            emissive: color, 
+            emissiveIntensity: emissiveInt 
+        });
+
+        // Floor creation
         const fGeo = new THREE.BoxGeometry(80, 1, 120);
         const floor = new THREE.Mesh(fGeo, floorMat);
         floor.position.set(x, -0.5, z);
-        this.scene.add(floor);
+        interiorGroup.add(floor);
 
-        const cMesh = new THREE.Mesh(fGeo, floorMat);
-        cMesh.position.set(x, 20, z);
-        this.scene.add(cMesh);
-
+        // Outer walls of the interior room - MUCH SHORTER (8 units) to avoid obscuring orthographic view
+        const wallHeight = 8;
         const walls = [
             { ox: 0, oz: -60, w: 80, d: 4 }, { ox: 0, oz: 60, w: 80, d: 4 },
             { ox: -40, oz: 0, w: 4, d: 120 }, { ox: 40, oz: 0, w: 4, d: 120 }
         ];
 
         walls.forEach((w, i) => {
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(w.w, 30, w.d), wallMat);
-            mesh.position.set(x + w.ox, 15, z + w.oz);
-            this.registerStatic(mesh);
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(w.w, wallHeight, w.d), wallMat);
+            mesh.position.set(x + w.ox, wallHeight / 2, z + w.oz);
+            interiorGroup.add(mesh);
+            this.registerStaticWithGroup(mesh, interiorGroup);
+
+            // Exit gate logic on the south wall (z: 60)
             if (i === 1) {
-                const exitGate = new THREE.Mesh(new THREE.BoxGeometry(12, 12, 2), new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 2.0 }));
-                exitGate.position.set(x, 6, z + w.oz - 2);
-                exitGate.userData = { isExit: true, targetName: name };
+                const exitGroup = new THREE.Group();
+                exitGroup.position.set(x, 0, z + w.oz - 2);
                 
-                const exitLight = new THREE.PointLight(color, 20, 30);
-                exitLight.position.set(0, 0, -2);
-                exitGate.add(exitLight);
+                // Double Doors Look
+                const doorMat = new THREE.MeshPhongMaterial({ color: 0x442211, emissive: 0x221100, emissiveIntensity: 0.5 });
+                const doorLeft = new THREE.Mesh(new THREE.BoxGeometry(7.5, 12, 1), doorMat);
+                doorLeft.position.set(-4, 6, 0);
+                const doorRight = new THREE.Mesh(new THREE.BoxGeometry(7.5, 12, 1), doorMat);
+                doorRight.position.set(4, 6, 0);
                 
-                const obj: WorldObject = { id: `exit-${name}-${Math.random()}`, mesh: exitGate, isStatic: true, type: 'gate' };
+                // Glowing trim to signal interaction
+                const trimMat = new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 2.0 });
+                const trim = new THREE.Mesh(new THREE.BoxGeometry(16, 1, 1.2), trimMat);
+                trim.position.set(0, 12, 0);
+                
+                exitGroup.add(doorLeft, doorRight, trim);
+                exitGroup.userData = { isExit: true, fromCastle: name };
+                
+                const exitLight = new THREE.PointLight(color, 5, 20);
+                exitLight.position.set(0, 6, -5);
+                exitGroup.add(exitLight);
+                
+                interiorGroup.add(exitGroup);
+                const obj: WorldObject = { id: `exit-${name}-${Math.random()}`, mesh: exitGroup, isStatic: true, type: 'gate' };
                 this.objects.push(obj);
                 this.addToGrid(obj);
             }
         });
 
-        if (name === 'EAST_CASTLE') this.createInteriorMaze(x, z, wallMat, [{ type: ItemType.KEY_BLACK, color: 0x111111 }]);
-        else if (name === 'WEST_CASTLE') this.createInteriorMaze(x, z, wallMat, [{ type: ItemType.CHALICE, color: 0xffd700 }, { type: ItemType.KEY_GOLD, color: 0xffd700 }]);
-        else if (name === 'NORTH_CASTLE') this.createThroneRoom(x, z, wallMat);
+        // Determine main item for this castle
+        let itemType = ItemType.KEY_BLACK;
+        let itemColor = 0x111111;
+        
+        if (name === 'WEST_CASTLE') { itemType = ItemType.CHALICE; itemColor = 0xffd700; }
+        else if (name === 'NORTH_CASTLE') { itemType = ItemType.KEY_GOLD; itemColor = 0xffd700; }
 
-        const light = new THREE.PointLight(color, 20, 150);
-        light.position.set(x, 10, z);
-        this.scene.add(light);
-    }
+        // Start over with empty rooms - just the items and essentials
+        const itemPos = new THREE.Vector3(x, 1.5, z - 45);
+        let itemMesh: THREE.Group | THREE.Mesh;
+        if (itemType === ItemType.CHALICE) {
+            itemMesh = ItemAssets.createChaliceGeometry();
+        } else {
+            itemMesh = ItemAssets.createKeyGeometry(itemColor);
+        }
+        
+        itemMesh.position.copy(itemPos);
+        itemMesh.userData = { itemType };
+        itemMesh.onBeforeRender = () => {
+            itemMesh.position.y = 1.5 + Math.sin(performance.now() * 0.005) * 0.2;
+            itemMesh.rotation.y += 0.02;
+        };
+        interiorGroup.add(itemMesh);
 
-    private createThroneRoom(cx: number, cz: number, mat: THREE.Material) {
-        const pillarGeo = new THREE.CylinderGeometry(2, 2, 30, 8);
-        [[-20, -20], [20, -20], [-20, 20], [20, 20], [-20, 50], [20, 50]].forEach(p => {
-            const pillar = new THREE.Mesh(pillarGeo, mat);
-            pillar.position.set(cx + p[0], 15, cz + p[1]);
-            this.registerStatic(pillar);
-        });
-
-        const throneGroup = new THREE.Group();
-        const base = new THREE.Mesh(new THREE.BoxGeometry(10, 2, 10), mat);
-        const back = new THREE.Mesh(new THREE.BoxGeometry(10, 15, 2), mat);
-        back.position.set(0, 7.5, -4);
-        throneGroup.add(base, back);
-
-        const crown = new THREE.Mesh(new THREE.TorusGeometry(3, 0.5, 8, 16), new THREE.MeshPhongMaterial({ color: 0xffd700 }));
-        crown.position.set(0, 15, -4);
-        throneGroup.add(crown);
-
-        throneGroup.position.set(cx, 1, cz - 50);
-        this.scene.add(throneGroup);
-        const obj: WorldObject = { id: `throne-${Math.random()}`, mesh: throneGroup, isStatic: true, type: 'throne' };
-        obj.mesh.userData.isThrone = true;
+        const obj: WorldObject = { id: `prog-${itemType}-${Math.random()}`, mesh: itemMesh, isStatic: false, type: 'item' };
         this.objects.push(obj);
         this.addToGrid(obj);
 
-        const throneLight = new THREE.PointLight(0xffd700, 20, 50);
-        throneLight.position.set(cx, 10, cz - 45);
-        this.scene.add(throneLight);
+        const itemLight = new THREE.PointLight(itemColor === 0x111111 ? 0xffffff : itemColor, 5, 50);
+        itemLight.position.copy(itemPos);
+        itemLight.position.y += 5;
+        interiorGroup.add(itemLight);
+
+        // Softer global interior light for visibility without being harsh
+        const ambientLight = new THREE.PointLight(0xffffff, 0.4, 400);
+        ambientLight.position.set(x, 100, z);
+        interiorGroup.add(ambientLight);
     }
 
-    private createInteriorMaze(cx: number, cz: number, mat: THREE.Material, items: { type: ItemType, color: number }[]) {
-        const dividers = [{ w: 50, d: 2, x: -15, z: -20 }, { w: 50, d: 2, x: 15, z: 20 }, { w: 2, d: 60, x: 0, z: 0 }, { w: 30, d: 2, x: 0, z: -40 }];
-        dividers.forEach(d => {
-            const wall = new THREE.Mesh(new THREE.BoxGeometry(d.w, 15, d.d), mat);
-            wall.position.set(cx + d.x, 7.5, cz + d.z);
-            this.registerStatic(wall);
-        });
+    private createThroneRoom(cx: number, cz: number, mat: THREE.Material, group: THREE.Group) {
+        // Obsolete - removed for simplification as requested
+    }
 
-        items.forEach((item, idx) => {
-            const offsetX = (items.length > 1) ? (idx - (items.length - 1) / 2) * 10 : 0;
-            const itemPos = new THREE.Vector3(cx + offsetX, 1.5, cz - 50);
-            const itemMesh = item.type === ItemType.CHALICE ? ItemAssets.createChaliceGeometry() : ItemAssets.createKeyGeometry(item.color);
-            itemMesh.position.copy(itemPos);
-            itemMesh.userData = { itemType: item.type };
-            itemMesh.onBeforeRender = () => {
-                itemMesh.position.y = 1.5 + Math.sin(performance.now() * 0.005) * 0.2;
-                itemMesh.rotation.y += 0.02;
-            };
-            this.scene.add(itemMesh);
-            const obj: WorldObject = { id: `prog-${item.type}-${Math.random()}`, mesh: itemMesh, isStatic: false, type: 'item' };
-            this.objects.push(obj);
-            this.addToGrid(obj);
-            const itemLight = new THREE.PointLight(item.color, 10, 20);
-            itemLight.position.copy(itemPos);
-            this.scene.add(itemLight);
+    private createInteriorMaze(cx: number, cz: number, mat: THREE.Material, items: { type: ItemType, color: number }[], group: THREE.Group) {
+        // Obsolete - removed for simplification as requested
+    }
+
+    public updateZones() {
+        Object.entries(this.castleGroups).forEach(([name, group]) => {
+            group.visible = !GameState.isOutdoor && GameState.currentZone === name;
         });
+    }
+
+    private registerStaticWithGroup(mesh: THREE.Mesh | THREE.Group, group: THREE.Group) {
+        group.add(mesh);
+        const obj: WorldObject = { id: `st-${Math.random()}`, mesh, isStatic: true, type: 'wall' };
+        this.objects.push(obj);
+        this.addToGrid(obj);
     }
 
     private registerStatic(mesh: THREE.Mesh | THREE.Group) {

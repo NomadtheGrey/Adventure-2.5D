@@ -14,7 +14,7 @@ export class CloudBat {
     private lastItemPickupTime: number = 0;
     private isMagnetized: boolean = false;
 
-    constructor(scene: THREE.Scene, worldLimit: number) {
+    constructor(scene: THREE.Object3D, worldLimit: number) {
         this.worldRect = worldLimit;
         this.mesh = new THREE.Group();
         

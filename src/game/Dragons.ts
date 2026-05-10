@@ -59,7 +59,7 @@ const behaviorStrategies: Record<string, (ctx: BehaviorContext) => THREE.Vector3
 
 class DragonSegment {
     mesh: THREE.Mesh;
-    constructor(scene: THREE.Scene, color: number) {
+    constructor(scene: THREE.Object3D, color: number) {
         // Crystalline "Crystal Snake" Geometry: Icosahedron
         const geo = new THREE.IcosahedronGeometry(1.6, 0); 
         const mat = new THREE.MeshPhongMaterial({ 
@@ -82,7 +82,7 @@ class DragonSegment {
 export class Dragon {
   id: string;
   type: DragonType;
-  scene: THREE.Scene;
+  scene: THREE.Object3D;
   segments: DragonSegment[] = [];
   segmentHistory: THREE.Vector3[] = [];
   position = new THREE.Vector3();
@@ -92,7 +92,7 @@ export class Dragon {
   guardTarget?: THREE.Vector3;
   private readonly historyLimit = 100;
 
-  constructor(scene: THREE.Scene, type: DragonType, startPos: THREE.Vector3) {
+  constructor(scene: THREE.Object3D, type: DragonType, startPos: THREE.Vector3) {
     this.id = `dragon-${type}-${Math.random()}`;
     this.scene = scene;
     this.type = type;
@@ -148,7 +148,7 @@ export class Dragon {
 
 export class DragonSystem {
     dragons: Dragon[] = [];
-    constructor(scene: THREE.Scene) {
+    constructor(scene: THREE.Object3D) {
         this.dragons.push(new Dragon(scene, DragonType.RHYNODON, new THREE.Vector3(120, 1, 120)));
         
         const green = new Dragon(scene, DragonType.GORGARYS, new THREE.Vector3(-120, 1, -120));

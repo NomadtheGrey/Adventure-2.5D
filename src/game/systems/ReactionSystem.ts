@@ -31,11 +31,17 @@ export class ReactionSystem {
                     state.message = "EXITING CASTLE";
                     state.messageTimer = 1.5;
                     state.isOutdoor = true;
-                    const target = userData.targetName;
-                    if (target === 'NORTH_CASTLE') player.mesh.position.set(0, 2, -285);
-                    else if (target === 'SOUTH_CASTLE') player.mesh.position.set(0, 2, 285);
-                    else if (target === 'EAST_CASTLE') player.mesh.position.set(285, 2, 0);
-                    else if (target === 'WEST_CASTLE') player.mesh.position.set(-285, 2, 0);
+                    state.activeInterior = null;
+                    state.currentZone = 'SECTOR';
+                    
+                    const from = userData.fromCastle;
+                    // Return player to the entrance of the castle they just left in the main world
+                    if (from === 'NORTH_CASTLE') player.mesh.position.set(0, 1.5, -280);
+                    else if (from === 'SOUTH_CASTLE') player.mesh.position.set(0, 1.5, 280);
+                    else if (from === 'EAST_CASTLE') player.mesh.position.set(280, 1.5, 0);
+                    else if (from === 'WEST_CASTLE') player.mesh.position.set(-280, 1.5, 0);
+                    else player.mesh.position.set(0, 1.5, 0); // Fallback
+                    
                     Audio.playPhase();
                 } else if (userData.isInteriorTrigger) {
                     const reqKey = userData.keyType as ItemType;
@@ -46,8 +52,18 @@ export class ReactionSystem {
                         state.messageTimer = 1.5;
                         state.isOutdoor = false;
                         const type = userData.castleType;
-                        // Spawn with offset to avoid maze walls at (0,0) relative to interior
+                        
+                        // Map internal type names to Zone names
+                        if (type === 'N') state.currentZone = 'NORTH_CASTLE';
+                        else if (type === 'S') state.currentZone = 'SOUTH_CASTLE';
+                        else if (type === 'W') state.currentZone = 'WEST_CASTLE';
+                        else if (type === 'E') state.currentZone = 'EAST_CASTLE';
+                        
+                        state.activeInterior = state.currentZone;
+
+                        // Teleport player to the interior map location
                         if (type === 'N') player.mesh.position.set(5000, 2, -4950);
+                        else if (type === 'S') player.mesh.position.set(5000, 2, 5050);
                         else if (type === 'W') player.mesh.position.set(-8000 + 10, 2, 50 + 10);
                         else if (type === 'E') player.mesh.position.set(8000 + 10, 2, 50 + 10);
                         Audio.playPhase();
@@ -113,7 +129,11 @@ export class ReactionSystem {
     }
 
     private static removeFromWorld(obj: WorldObject, world: World) {
-        world.scene.remove(obj.mesh);
+        if (obj.mesh.parent) {
+            obj.mesh.parent.remove(obj.mesh);
+        } else {
+            world.scene.remove(obj.mesh);
+        }
         world.removeFromGrid(obj);
         const idx = world.objects.indexOf(obj);
         if (idx !== -1) world.objects.splice(idx, 1);

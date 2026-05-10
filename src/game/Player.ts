@@ -31,9 +31,10 @@ export class Player {
     this.initItemVisuals();
     this.mesh.add(this.itemContainer);
 
-    this.interiorLight = new THREE.PointLight(0xffffff, 0, 50);
-    this.interiorLight.decay = 1.5;
-    this.interiorLight.position.y = 4;
+    // Light used when inside castles to illuminate the player and surroundings
+    this.interiorLight = new THREE.PointLight(0xffffff, 0, 60);
+    this.interiorLight.decay = 1.0; // Slower light falloff for better visibility
+    this.interiorLight.position.y = 5;
     this.mesh.add(this.interiorLight);
 
     this.scene.add(this.mesh);
@@ -220,10 +221,12 @@ export class Player {
     const velocity = (_moveVector.length() / this.speed); // normalized velocity
     GameState.isMoving = velocity > 0.01;
     GameState.movingSpeed = velocity;
-    GameState.isOutdoor = GameState.currentZone === 'SECTOR';
+    // Improved Zone Detection
+    GameState.isOutdoor = GameState.currentZone === 'SECTOR' || GameState.currentZone === 'LANDING';
     
-    // Adjust interior spotlight
-    this.interiorLight.intensity = GameState.isOutdoor ? 0 : 60;
+    // Toggle and adjust the personal light based on whether we are in a sub-zone (castle)
+    this.interiorLight.intensity = GameState.isOutdoor ? 0 : 300;
+    this.interiorLight.distance = GameState.isOutdoor ? 60 : 150;
   }
 
   private normalizeAngle(angle: number): number {

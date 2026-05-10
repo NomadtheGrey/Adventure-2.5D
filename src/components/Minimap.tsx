@@ -22,7 +22,7 @@ const MinimapMarkers = () => {
 
         if (isOffscreen) {
             // Only show trackers for important entities
-            const isImportant = poi.type === 'dragon' || poi.type === 'item' || poi.type === 'gate';
+            const isImportant = poi.type === 'dragon' || poi.type === 'item' || poi.type === 'gate' || poi.type === 'throne';
             if (isImportant) {
                 const dist = Math.sqrt(distSq);
                 finalDx = (dx / dist) * 90;
@@ -46,6 +46,11 @@ const MinimapMarkers = () => {
                 else if (poi.type === 'bat') { size = 6; opacity = 1.0; borderRadius = '0'; }
                 else if (poi.type === 'item') { size = 8; opacity = 1.0; borderRadius = '50%'; }
                 else if (poi.type === 'gate') { size = 10; opacity = 1.0; borderRadius = '2px'; }
+                else if (poi.type === 'tree') { size = 4; opacity = 0.5; borderRadius = '1px'; }
+                else if (poi.type === 'bush') { size = 3; opacity = 0.4; borderRadius = '1px'; }
+                else if (poi.type === 'water') { size = 12; opacity = 0.3; borderRadius = '2px'; }
+                else if (poi.type === 'wall') { size = 6; opacity = 0.6; borderRadius = '1px'; }
+                else if (poi.type === 'throne') { size = 12; opacity = 1.0; borderRadius = '0'; }
 
                 if (isOffscreen) size = 4;
 

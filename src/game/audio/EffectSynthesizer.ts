@@ -5,21 +5,25 @@ export class EffectSynthesizer {
 
     public beep(freq: number, duration: number, type: OscillatorType = 'sine', delay = 0) {
         if (GameState.audio.isMuted) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, this.ctx.currentTime + delay + duration);
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.5, this.ctx.currentTime + delay + duration);
 
-        gain.gain.setValueAtTime(0.3, this.ctx.currentTime + delay);
-        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + delay + duration);
+            gain.gain.setValueAtTime(0.5, this.ctx.currentTime + delay);
+            gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
 
-        osc.connect(gain);
-        gain.connect(this.masterBus);
-        
-        osc.start(this.ctx.currentTime + delay);
-        osc.stop(this.ctx.currentTime + delay + duration);
+            osc.connect(gain);
+            gain.connect(this.masterBus);
+            
+            osc.start(this.ctx.currentTime + delay);
+            osc.stop(this.ctx.currentTime + delay + duration);
+        } catch (e) {
+            console.error("EffectSynthesizer: beep failed", e);
+        }
     }
 
     public noise(duration: number, volume: number) {

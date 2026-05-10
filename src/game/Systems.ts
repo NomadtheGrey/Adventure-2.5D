@@ -24,12 +24,11 @@ export class Systems {
         // Update telemetry
         TelemetrySystem.update();
 
-        // Update adaptive audio
-        Audio.update(state);
-
-        // Update zone & context
-        const distFromCenter = state.playerPos.length();
-        state.currentZone = distFromCenter < 35 ? 'LANDING' : 'SECTOR';
+        // Update zone & context (Only if outdoor to avoid flickering when teleports happen)
+        if (state.isOutdoor) {
+            const distFromCenter = state.playerPos.length();
+            state.currentZone = distFromCenter < 35 ? 'LANDING' : 'SECTOR';
+        }
 
         if (state.messageTimer > 0) {
             state.messageTimer -= 0.016;

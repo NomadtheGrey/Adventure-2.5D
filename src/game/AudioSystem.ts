@@ -7,34 +7,89 @@ import { EffectSynthesizer } from './audio/EffectSynthesizer';
  * Orchestrates synthesizers for techno-simulation sounds.
  */
 export class AudioManager {
-    private ctx: AudioContext | null = null;
-    private masterBus: GainNode | null = null;
-    private droneSynth: DroneSynthesizer | null = null;
-    private effectSynth: EffectSynthesizer | null = null;
+    public ctx: AudioContext | null = null;
+    public masterBus: GainNode | null = null;
+    public droneSynth: DroneSynthesizer | null = null;
+    public effectSynth: EffectSynthesizer | null = null;
+
+    constructor() {
+        // Singleton guard via global window object
+        if ((window as any)._AudioSystemInstance) {
+            return (window as any)._AudioSystemInstance;
+        }
+        (window as any)._AudioSystemInstance = this;
+        (window as any)._AudioSystem = this; // Helpful shortcut
+    }
 
     public init() {
-        if (this.ctx) return;
-        this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        this.masterBus = this.ctx.createGain();
-        this.masterBus.gain.value = 0.15;
-        this.masterBus.connect(this.ctx.destination);
+        // If already fully initialized, don't repeat
+        if (this.ctx && this.effectSynth && this.droneSynth) return;
 
-        this.droneSynth = new DroneSynthesizer(this.ctx, this.masterBus);
-        this.effectSynth = new EffectSynthesizer(this.ctx, this.masterBus);
+        try {
+            console.log("AudioSystem: Initializing...");
+            
+            // Clean up old context if half-baked
+            if (this.ctx) {
+                try { this.ctx.close(); } catch(e) {}
+                this.ctx = null;
+            }
 
-        this.droneSynth.start();
+            const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+            if (!AudioContextClass) {
+                console.error("AudioSystem: No AudioContext support found.");
+                return;
+            }
+
+            this.ctx = new AudioContextClass();
+            if (!this.ctx) {
+                console.error("AudioSystem: Failed to create AudioContext");
+                return;
+            }
+
+            this.masterBus = this.ctx.createGain();
+            this.masterBus.gain.value = 1.0; 
+            this.masterBus.connect(this.ctx.destination);
+
+            this.droneSynth = new DroneSynthesizer(this.ctx, this.masterBus);
+            this.effectSynth = new EffectSynthesizer(this.ctx, this.masterBus);
+
+            // Trigger start on drone
+            this.droneSynth.start();
+            
+            console.log("AudioSystem: Successfully Initialized. State:", this.ctx.state);
+        } catch (e) {
+            console.error("AudioSystem: Initialization failed critically:", e);
+            this.ctx = null;
+            this.effectSynth = null;
+            this.droneSynth = null;
+        }
+    }
+
+    public resume() {
+        if (this.ctx && (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted')) {
+            console.log("AudioSystem: Resuming context from state:", this.ctx.state);
+            this.ctx.resume().then(() => {
+                console.log("AudioSystem: Resumed. State:", this.ctx?.state);
+            }).catch(err => {
+                console.error("AudioSystem: Resume error:", err);
+            });
+        }
     }
 
     public playRadarPulse() {
         if (!this.effectSynth || GameState.audio.isRadarMuted) return;
+        console.log("AudioSystem: playing radar pulse");
         this.effectSynth.beep(440, 0.05, 'sine', 0);
         this.effectSynth.beep(880, 0.02, 'sine', 0.05);
     }
 
     public playUIClick() {
-        if (!this.effectSynth) return;
+        if (!this.effectSynth) {
+            console.warn("AudioSystem: playUIClick called but effectSynth is null");
+            return;
+        }
+        console.log("AudioSystem: playing click");
         this.effectSynth.beep(2000, 0.01, 'sine', 0);
-        this.effectSynth.beep(4000, 0.01, 'sine', 0.01);
     }
 
     public playCollect() {
@@ -68,7 +123,15 @@ export class AudioManager {
     }
 
     public update(state: GameStateData) {
-        if (!this.ctx || this.ctx.state !== 'running' || !this.masterBus || !this.droneSynth) return;
+        if (!this.ctx || !this.masterBus || !this.droneSynth) return;
+
+        // Efficient resume check
+        if (this.ctx.state === 'suspended' && state.isInitialized) {
+            this.resume();
+            return; // Wait for resume before continuing
+        }
+
+        if (this.ctx.state !== 'running') return;
 
         if (state.audio.isMuted || state.isPaused) {
             this.masterBus.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.2); 
@@ -89,13 +152,14 @@ export class AudioManager {
             if (intensity > maxThreat) maxThreat = intensity;
         });
 
-        this.masterBus.gain.setTargetAtTime(0.15 + (maxThreat * 0.1), this.ctx.currentTime, 0.5);
+        this.masterBus.gain.setTargetAtTime(0.3 + (maxThreat * 0.2), this.ctx.currentTime, 0.5);
         this.droneSynth.update(state, maxThreat);
 
         if (maxThreat > 0.8 && Math.random() > 0.98 && this.effectSynth) {
-            this.effectSynth.noise(0.05, 0.05 * maxThreat);
+            this.effectSynth.noise(0.05, 0.2 * maxThreat);
         }
     }
 }
 
-export const Audio = new AudioManager();
+export const Audio = (window as any)._AudioSystemInstance || new AudioManager();
+(window as any)._AudioSystemInstance = Audio;

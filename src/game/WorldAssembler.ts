@@ -53,6 +53,11 @@ export class WorldAssembler {
                 this.world.spawnGateAt(ItemType.KEY_SILVER, new THREE.Vector3(x - gateDist, 2, z)); 
                 return;
             }
+            if (rz === this.gridSize - 1 && rx === mid) {
+                this.assetManager.createCastle(x, z, 0xff00ff, 'S', ItemType.KEY_GOLD);
+                this.world.spawnGateAt(ItemType.KEY_GOLD, new THREE.Vector3(x, 2, z - gateDist)); 
+                return;
+            }
             return;
         }
 
@@ -125,6 +130,7 @@ export class WorldAssembler {
             }
         }
         this.assetManager.createCastleInterior(5000, -5000, 0xffd700, 'NORTH_CASTLE');
+        this.assetManager.createCastleInterior(5000, 5000, 0xff00ff, 'SOUTH_CASTLE');
         this.assetManager.createCastleInterior(8000, 0, 0xc0c0c0, 'EAST_CASTLE');
         this.assetManager.createCastleInterior(-8000, 0, 0x111111, 'WEST_CASTLE');
     }

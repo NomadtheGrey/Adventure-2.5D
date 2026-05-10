@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeBufferGeometries } from 'three-stdlib';
 
 export class FractalAssets {
     public static createFractalTree(): THREE.Group {
@@ -17,6 +18,45 @@ export class FractalAssets {
         this.addNodes(group, new THREE.Vector3(0, 6, 0), 3.5, leafColor, 0);
 
         return group;
+    }
+
+    /**
+     * Generates a single merged BufferGeometry representing a fractal tree.
+     * This is used for high-performance instanced rendering while keeping the complex look.
+     */
+    public static createFractalTreeGeometry(): { trunk: THREE.BufferGeometry, leaves: THREE.BufferGeometry } {
+        const trunkGeo = new THREE.CylinderGeometry(0.5, 0.8, 6, 6);
+        trunkGeo.translate(0, 3, 0);
+
+        const leafGeos: THREE.BufferGeometry[] = [];
+        this.collectNodeGeos(leafGeos, new THREE.Vector3(0, 6, 0), 3.5, 0);
+        
+        const mergedLeaves = mergeBufferGeometries(leafGeos);
+        
+        return {
+            trunk: trunkGeo,
+            leaves: mergedLeaves
+        };
+    }
+
+    private static collectNodeGeos(geos: THREE.BufferGeometry[], pos: THREE.Vector3, size: number, depth: number) {
+        if (depth > 2) return;
+
+        const nodeGeo = new THREE.OctahedronGeometry(size, 0);
+        nodeGeo.translate(pos.x, pos.y, pos.z);
+        geos.push(nodeGeo);
+
+        const count = 3;
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2;
+            const dist = size * 0.8;
+            const nextPos = new THREE.Vector3(
+                pos.x + Math.cos(angle) * dist,
+                pos.y + size * 0.6,
+                pos.z + Math.sin(angle) * dist
+            );
+            this.collectNodeGeos(geos, nextPos, size * 0.6, depth + 1);
+        }
     }
 
     private static addNodes(parent: THREE.Group, pos: THREE.Vector3, size: number, color: number, depth: number) {

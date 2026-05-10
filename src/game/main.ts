@@ -22,6 +22,8 @@ export class Game {
   cloudBat: CloudBat;
   ambient: THREE.AmbientLight;
   dirLight: THREE.DirectionalLight;
+  worldGroup: THREE.Group;
+  interiorGroup: THREE.Group;
   lastTime: number = performance.now();
   fpsLastTime: number = performance.now();
   frames: number = 0;
@@ -29,6 +31,10 @@ export class Game {
   constructor(container: HTMLElement) {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x87ceeb);
+
+    this.worldGroup = new THREE.Group();
+    this.interiorGroup = new THREE.Group();
+    this.scene.add(this.worldGroup, this.interiorGroup);
 
     const aspect = window.innerWidth / window.innerHeight;
     const d = 20;
@@ -47,10 +53,10 @@ export class Game {
     this.initHardwareInfo();
     this.initLights();
 
-    this.world = new World(this.scene);
+    this.world = new World(this.scene, this.worldGroup, this.interiorGroup);
     this.player = new Player(this.scene);
-    this.dragons = new DragonSystem(this.scene);
-    this.cloudBat = new CloudBat(this.scene, 400);
+    this.dragons = new DragonSystem(this.worldGroup); // Dragons belong to outdoor
+    this.cloudBat = new CloudBat(this.worldGroup, 400); // Bats belong to outdoor
 
     this.setupEvents();
     this.animate();
@@ -77,6 +83,11 @@ export class Game {
   private setupEvents() {
     window.addEventListener('resize', this.onResize.bind(this));
     window.addEventListener('wheel', (e) => InventorySystem.scroll(e.deltaY));
+    window.addEventListener('click', () => {
+      if (GameState.isInitialized) {
+        Audio.resume();
+      }
+    });
   }
 
   private onResize() {
@@ -90,10 +101,15 @@ export class Game {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
+    /**
+     * MAIN RENDERING LOOP
+     * Handles logic updates and scene rendering
+     */
   private animate() {
     requestAnimationFrame(this.animate.bind(this));
 
     const now = performance.now();
+    // Delta time calculation capped to prevent huge jumps on tab switch
     const dt = Math.min((now - this.lastTime) / 1000, 0.1);
     this.lastTime = now;
 
@@ -101,6 +117,10 @@ export class Game {
     this.render();
   }
 
+  /**
+   * CORE GAME LOGIC
+   * Runs all system updates (movement, collisions, states)
+   */
   private updateLogic(dt: number, now: number) {
     this.frames++;
     this.updateDebugStats(now);
@@ -142,12 +162,16 @@ export class Game {
 
     const nearby = this.world.getNearby(this.player.mesh.position, 80);
     const objectPois = nearby
-        .filter(obj => !obj.isCollected && (obj.type === 'item' || obj.type === 'gate' || obj.type === 'throne'))
+        .filter(obj => !obj.isCollected)
         .map((obj) => {
             let color = 0xffffff;
             if (obj.type === 'item') color = 0xff00ff;
             else if (obj.type === 'gate') color = 0xfacc15;
             else if (obj.type === 'throne') color = 0xffd700;
+            else if (obj.type === 'tree') color = 0x10b981;
+            else if (obj.type === 'bush') color = 0x34d399;
+            else if (obj.type === 'water') color = 0x3b82f6;
+            else if (obj.type === 'wall') color = 0x4b5563;
 
             return {
                 id: obj.id,
@@ -168,11 +192,15 @@ export class Game {
   }
 
   private render() {
-    // Dynamic Lighting based on zone
+    // Dynamic Lighting and Zone Visibility (Separate Maps)
     const isOutdoor = GameState.isOutdoor;
-    this.ambient.intensity = THREE.MathUtils.lerp(this.ambient.intensity, isOutdoor ? 0.6 : 0.2, 0.1);
-    this.dirLight.intensity = THREE.MathUtils.lerp(this.dirLight.intensity, isOutdoor ? 0.8 : 0.1, 0.1);
-    this.scene.background = new THREE.Color(isOutdoor ? 0x87ceeb : 0x010101);
+    this.worldGroup.visible = isOutdoor;
+    this.interiorGroup.visible = !isOutdoor;
+    this.world.updateZones();
+
+    this.ambient.intensity = THREE.MathUtils.lerp(this.ambient.intensity, isOutdoor ? 0.6 : 1.0, 0.1);
+    this.dirLight.intensity = THREE.MathUtils.lerp(this.dirLight.intensity, isOutdoor ? 0.8 : 0.0, 0.1);
+    this.scene.background = new THREE.Color(isOutdoor ? 0x87ceeb : 0x050505);
 
     this.camera.position.x = this.player.mesh.position.x + _camOffset.x;
     this.camera.position.y = this.player.mesh.position.y + _camOffset.y;

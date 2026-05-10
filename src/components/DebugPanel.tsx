@@ -1,4 +1,5 @@
 import { GameState } from '../game/GameState';
+import { APP_METADATA } from '../version';
 
 export const DebugPanel = () => {
     const isSoftware = GameState.debug.gpu.includes('CPU');
@@ -8,7 +9,7 @@ export const DebugPanel = () => {
             <div className="flex justify-between items-center text-biometric text-[10px]">
                 <div className="flex items-center gap-2">
                     <div className={`w-1.5 h-1.5 rounded-full ${isSoftware ? 'bg-red-500 animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
-                    <span className={isSoftware ? 'text-red-400' : ''}>{GameState.debug.fps} FPS</span>
+                    <span className={isSoftware ? 'text-red-400' : ''}>{GameState.debug.fps} FPS // v{APP_METADATA.version}</span>
                 </div>
                 <div className="flex gap-4 text-telemetry">
                     <span>TRIS: {(GameState.debug.triangles / 1000).toFixed(1)}k</span>

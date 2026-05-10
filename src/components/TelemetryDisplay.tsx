@@ -1,13 +1,19 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { GameState } from '../game/GameState';
+import { APP_METADATA } from '../version';
 
 export function TelemetryDisplay() {
     const logs = GameState.telemetryLogs;
 
     return (
         <div className="flex flex-col gap-1 w-64 pointer-events-none select-none">
-            <div className="text-[10px] text-emerald-500 font-mono opacity-60 tracking-[0.2em] mb-2 uppercase border-b border-emerald-900/50 pb-1">
-                Telemetry Log
+            <div className="flex justify-between items-end mb-2 border-b border-emerald-900/50 pb-1">
+                <div className="text-[10px] text-emerald-500 font-mono opacity-60 tracking-[0.2em] uppercase">
+                    Telemetry Log
+                </div>
+                <div className="text-[9px] text-emerald-500 font-mono opacity-40">
+                    v{APP_METADATA.version}
+                </div>
             </div>
             <div className="flex flex-col-reverse gap-1">
                 <AnimatePresence initial={false}>

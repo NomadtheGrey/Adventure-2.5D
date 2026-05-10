@@ -13,8 +13,15 @@ const _position = new THREE.Vector3();
 const _quaternion = new THREE.Quaternion();
 const _scale = new THREE.Vector3();
 
+/**
+ * WORLD ASSET MANAGER
+ * Centralized system for creating and managing all geometry in the game.
+ * Uses instancing for nature assets (trees, bushes) to maintain performance.
+ */
 export class WorldAssetManager {
     private scene: THREE.Scene;
+    private outdoorLayer: THREE.Group;
+    private interiorLayer: THREE.Group;
     private objects: WorldObject[];
     private addToGrid: (obj: WorldObject) => void;
     private castleBuilder: CastleAssets;
@@ -28,12 +35,14 @@ export class WorldAssetManager {
 
     private textures: Record<string, THREE.Texture> = {};
 
-    constructor(scene: THREE.Scene, objects: WorldObject[], addToGrid: (obj: WorldObject) => void) {
+    constructor(scene: THREE.Scene, worldGroup: THREE.Group, interiorGroup: THREE.Group, objects: WorldObject[], addToGrid: (obj: WorldObject) => void) {
         this.scene = scene;
+        this.outdoorLayer = worldGroup;
+        this.interiorLayer = interiorGroup;
         this.objects = objects;
         this.addToGrid = addToGrid;
         this.initTextures();
-        this.castleBuilder = new CastleAssets(scene, objects, addToGrid);
+        this.castleBuilder = new CastleAssets(interiorGroup, objects, addToGrid);
     }
 
     private initTextures() {
@@ -52,9 +61,6 @@ export class WorldAssetManager {
         if (config.strategy === 'instanced') {
             const queue = this.instancedQueues[type];
             if (queue) queue.push(new THREE.Vector3(x, 0, z));
-            if (type === 'water') {
-                // Store dimensions for water specifically if needed, but for now we use fixed w/d
-            }
             return;
         }
 
@@ -70,7 +76,7 @@ export class WorldAssetManager {
         const mesh = new THREE.Mesh(geo, mat);
         
         mesh.position.set(x, (config.geometry.height || 0.5) / 2, z);
-        this.scene.add(mesh);
+        this.outdoorLayer.add(mesh);
         
         const obj: WorldObject = { id: `wall-${x}-${z}-${Math.random()}`, mesh, isStatic: true, type: 'wall' };
         this.objects.push(obj);
@@ -78,11 +84,19 @@ export class WorldAssetManager {
     }
 
     public createCastle(x: number, z: number, color: number, orientation: 'N' | 'S' | 'E' | 'W', keyType: ItemType) {
-        this.castleBuilder.createCastle(x, z, color, orientation, keyType);
+        // The exterior of the castle stays in the outdoor layer
+        const exteriorGroup = new THREE.Group();
+        this.outdoorLayer.add(exteriorGroup);
+        const builder = new CastleAssets(exteriorGroup, this.objects, this.addToGrid);
+        builder.createCastle(x, z, color, orientation, keyType);
     }
 
     public createCastleInterior(x: number, z: number, color: number, name: string) {
         this.castleBuilder.createCastleInterior(x, z, color, name);
+    }
+
+    public updateZones() {
+        this.castleBuilder.updateZones();
     }
 
     public createKeyGeometry(color: number): THREE.Group {
@@ -112,27 +126,29 @@ export class WorldAssetManager {
             const config = (natureConfig.natureTypes as any)[type];
             
             if (type === 'tree') {
-                // Trees have trunks and leaves
-                const trunkGeo = new THREE.CylinderGeometry(0.5, 0.8, 6, 6);
-                const trunkMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
-                const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, positions.length);
+                const { trunk, leaves } = FractalAssets.createFractalTreeGeometry();
                 
-                const leafGeo = new THREE.OctahedronGeometry(4, 0);
-                const leafMat = new THREE.MeshPhongMaterial({ color: 0x10b981, transparent: true, opacity: 0.7, flatShading: true });
-                const leafMesh = new THREE.InstancedMesh(leafGeo, leafMat, positions.length);
+                const trunkMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
+                const trunkMesh = new THREE.InstancedMesh(trunk, trunkMat, positions.length);
+                
+                const leafMat = new THREE.MeshPhongMaterial({ 
+                    color: 0x10b981, 
+                    transparent: true, 
+                    opacity: 0.8, 
+                    flatShading: true,
+                    map: this.textures.tree
+                });
+                const leafMesh = new THREE.InstancedMesh(leaves, leafMat, positions.length);
 
                 positions.forEach((pos, i) => {
-                    _position.set(pos.x, 3, pos.z);
+                    _position.set(pos.x, 0, pos.z);
                     _tempMatrix.identity().setPosition(_position);
                     trunkMesh.setMatrixAt(i, _tempMatrix);
-
-                    _position.set(pos.x, 7, pos.z);
-                    _tempMatrix.identity().setPosition(_position);
                     leafMesh.setMatrixAt(i, _tempMatrix);
 
                     this.addInstanceCollision(pos, config.collision, 4, 'tree');
                 });
-                this.scene.add(trunkMesh, leafMesh);
+                this.outdoorLayer.add(trunkMesh, leafMesh);
                 return;
             }
 
@@ -172,7 +188,7 @@ export class WorldAssetManager {
                 this.addInstanceCollision(pos, config.collision, yOffset, type);
             });
 
-            this.scene.add(instance);
+            this.outdoorLayer.add(instance);
         });
     }
 

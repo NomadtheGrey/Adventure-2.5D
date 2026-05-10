@@ -38,10 +38,11 @@ export const Overlays = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => {
+                                console.log("Overlays: Engage Link clicked");
                                 Audio.init();
-                                Audio.playUIClick();
+                                Audio.resume();
+                                setTimeout(() => Audio.playUIClick(), 100);
                                 GameState.isInitialized = true;
-                                setTick(t => t + 1);
                             }}
                             className="btn-link-engage min-w-[280px]"
                         >
