@@ -22,7 +22,8 @@ export class WorldAssetManager {
     private instancedQueues: Record<string, THREE.Vector3[]> = {
         tree: [],
         bush: [],
-        grass: []
+        grass: [],
+        water: []
     };
 
     private textures: Record<string, THREE.Texture> = {};
@@ -48,19 +49,12 @@ export class WorldAssetManager {
         const config = (natureConfig.natureTypes as any)[type];
         if (!config) return;
 
-        if (config.strategy === 'instanced' && type !== 'tree') {
+        if (config.strategy === 'instanced') {
             const queue = this.instancedQueues[type];
             if (queue) queue.push(new THREE.Vector3(x, 0, z));
-            return;
-        }
-
-        if (type === 'tree') {
-            const tree = FractalAssets.createFractalTree();
-            tree.position.set(x, 0, z);
-            this.scene.add(tree);
-            const obj: WorldObject = { id: `tree-${x}-${z}-${Math.random()}`, mesh: tree, isStatic: true, type: 'tree' };
-            this.objects.push(obj);
-            this.addToGrid(obj);
+            if (type === 'water') {
+                // Store dimensions for water specifically if needed, but for now we use fixed w/d
+            }
             return;
         }
 
@@ -116,6 +110,32 @@ export class WorldAssetManager {
             if (positions.length === 0) return;
             
             const config = (natureConfig.natureTypes as any)[type];
+            
+            if (type === 'tree') {
+                // Trees have trunks and leaves
+                const trunkGeo = new THREE.CylinderGeometry(0.5, 0.8, 6, 6);
+                const trunkMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
+                const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, positions.length);
+                
+                const leafGeo = new THREE.OctahedronGeometry(4, 0);
+                const leafMat = new THREE.MeshPhongMaterial({ color: 0x10b981, transparent: true, opacity: 0.7, flatShading: true });
+                const leafMesh = new THREE.InstancedMesh(leafGeo, leafMat, positions.length);
+
+                positions.forEach((pos, i) => {
+                    _position.set(pos.x, 3, pos.z);
+                    _tempMatrix.identity().setPosition(_position);
+                    trunkMesh.setMatrixAt(i, _tempMatrix);
+
+                    _position.set(pos.x, 7, pos.z);
+                    _tempMatrix.identity().setPosition(_position);
+                    leafMesh.setMatrixAt(i, _tempMatrix);
+
+                    this.addInstanceCollision(pos, config.collision, 4, 'tree');
+                });
+                this.scene.add(trunkMesh, leafMesh);
+                return;
+            }
+
             const geo = this.getGeometry(config.geometry);
             const mat = new THREE.MeshLambertMaterial({
                 ...config.material,

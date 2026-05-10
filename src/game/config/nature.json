@@ -19,9 +19,10 @@
       "collision": null
     },
     "water": {
-      "strategy": "static",
-      "geometry": { "type": "box", "height": 0.5 },
-      "material": { "color": 1947877, "transparent": true, "opacity": 0.6 }
+      "strategy": "instanced",
+      "geometry": { "type": "box", "width": 40, "height": 0.5, "depth": 40 },
+      "material": { "color": 1947877, "transparent": true, "opacity": 0.6 },
+      "collision": null
     }
   },
   "roomTemplates": [

@@ -4,19 +4,6 @@ import { GameState } from '../game/GameState';
 import { Audio } from '../game/AudioSystem';
 
 export const Overlays = () => {
-    const [, setTick] = useState(0);
-
-    useEffect(() => {
-        // Refresh overlays for message updates or state transitions
-        let frame: number;
-        const sync = () => {
-            setTick(t => t + 1);
-            frame = requestAnimationFrame(sync);
-        };
-        sync();
-        return () => cancelAnimationFrame(frame);
-    }, []);
-
     return (
         <AnimatePresence>
             {!GameState.isInitialized && (

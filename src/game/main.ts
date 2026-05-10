@@ -142,14 +142,12 @@ export class Game {
 
     const nearby = this.world.getNearby(this.player.mesh.position, 80);
     const objectPois = nearby
-        .filter(obj => !obj.isCollected)
+        .filter(obj => !obj.isCollected && (obj.type === 'item' || obj.type === 'gate' || obj.type === 'throne'))
         .map((obj) => {
             let color = 0xffffff;
             if (obj.type === 'item') color = 0xff00ff;
-            else if (obj.type === 'tree') color = 0x10b981;
-            else if (obj.type === 'bush') color = 0x34d399;
-            else if (obj.type === 'water') color = 0x60a5fa;
             else if (obj.type === 'gate') color = 0xfacc15;
+            else if (obj.type === 'throne') color = 0xffd700;
 
             return {
                 id: obj.id,

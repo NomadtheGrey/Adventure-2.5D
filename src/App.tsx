@@ -14,7 +14,7 @@ import { GameState } from './game/GameState';
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Game | null>(null);
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (containerRef.current && !gameRef.current) {
@@ -31,13 +31,18 @@ export default function App() {
 
     window.addEventListener('keydown', handleKey);
 
-    // Minor refresh for global transitions
-    const interval = setInterval(() => {
-        if (!GameState.isInitialized) setTick(t => t + 1);
-    }, 100);
+    let frame: number;
+    const sync = () => {
+        setTick(t => (t + 1) % 1000000);
+        // Hud update at 30fps is enough
+        setTimeout(() => {
+            frame = requestAnimationFrame(sync);
+        }, 1000 / 30);
+    };
+    sync();
 
     return () => {
-        clearInterval(interval);
+        cancelAnimationFrame(frame);
         window.removeEventListener('keydown', handleKey);
     };
   }, []);

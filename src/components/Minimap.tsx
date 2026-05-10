@@ -22,7 +22,8 @@ const MinimapMarkers = () => {
 
         if (isOffscreen) {
             // Only show trackers for important entities
-            if (poi.type === 'bat' || poi.type === 'dragon' || poi.type === 'item') {
+            const isImportant = poi.type === 'dragon' || poi.type === 'item' || poi.type === 'gate';
+            if (isImportant) {
                 const dist = Math.sqrt(distSq);
                 finalDx = (dx / dist) * 90;
                 finalDz = (dz / dist) * 90;
@@ -39,15 +40,12 @@ const MinimapMarkers = () => {
             {markers.map(({ poi, dx, dz, isOffscreen }) => {
                 let size = 8;
                 let opacity = isOffscreen ? 0.6 : 1;
-                let borderRadius = '50%';
+                let borderRadius = '2px';
                 
-                if (poi.type === 'tree') { size = 5; opacity = 0.6; }
-                else if (poi.type === 'bush') { size = 4; opacity = 0.5; }
-                else if (poi.type === 'water') { size = 12; opacity = 0.4; borderRadius = '4px'; }
-                else if (poi.type === 'wall') { size = 6; opacity = 0.7; borderRadius = '2px'; }
-                else if (poi.type === 'gate') { size = 10; opacity = 0.9; borderRadius = '2px'; }
-                else if (poi.type === 'dragon') { size = 8; opacity = 1.0; }
+                if (poi.type === 'dragon') { size = 8; opacity = 1.0; borderRadius = '50%'; }
                 else if (poi.type === 'bat') { size = 6; opacity = 1.0; borderRadius = '0'; }
+                else if (poi.type === 'item') { size = 8; opacity = 1.0; borderRadius = '50%'; }
+                else if (poi.type === 'gate') { size = 10; opacity = 1.0; borderRadius = '2px'; }
 
                 if (isOffscreen) size = 4;
 
@@ -93,17 +91,6 @@ const MinimapMarkers = () => {
 
 export const Minimap = () => {
     const [isMuted, setIsMuted] = useState(GameState.audio.isRadarMuted);
-    const [, setTick] = useState(0);
-
-    React.useEffect(() => {
-        let frame: number;
-        const sync = () => {
-            setTick(t => t + 1);
-            frame = requestAnimationFrame(sync);
-        };
-        sync();
-        return () => cancelAnimationFrame(frame);
-    }, []);
 
     if (!GameState.hud.showMinimap) return null;
 

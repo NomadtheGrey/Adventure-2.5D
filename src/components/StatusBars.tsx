@@ -14,18 +14,6 @@ export const TitleCard = () => {
 };
 
 export const SignalIntegrityBar = () => {
-    const [, setTick] = useState(0);
-    
-    useEffect(() => {
-        let frame: number;
-        const sync = () => {
-            setTick(t => t + 1);
-            frame = requestAnimationFrame(sync);
-        };
-        sync();
-        return () => cancelAnimationFrame(frame);
-    }, []);
-
     const integrity = GameState.signalIntegrity;
     const color = integrity > 0.3 ? 'bg-emerald-500' : 'bg-red-500';
     
@@ -49,18 +37,6 @@ export const SignalIntegrityBar = () => {
 };
 
 export const GearDisplay = () => {
-    const [, setTick] = useState(0);
-    
-    useEffect(() => {
-        let frame: number;
-        const sync = () => {
-            setTick(t => t + 1);
-            frame = requestAnimationFrame(sync);
-        };
-        sync();
-        return () => cancelAnimationFrame(frame);
-    }, []);
-
     const activeItem = InventorySystem.getActiveItem();
     return (
         <div className="acheron-panel p-5 flex flex-col gap-3 min-w-[200px] pointer-events-none">
@@ -93,18 +69,6 @@ export const GearDisplay = () => {
 };
 
 export const Compass = () => {
-    const [, setTick] = useState(0);
-    
-    useEffect(() => {
-        let frame: number;
-        const sync = () => {
-            setTick(t => t + 1);
-            frame = requestAnimationFrame(sync);
-        };
-        sync();
-        return () => cancelAnimationFrame(frame);
-    }, []);
-
     return (
         <div className="acheron-panel rounded-full w-24 h-24 flex items-center justify-center relative pointer-events-none">
             <motion.div 
