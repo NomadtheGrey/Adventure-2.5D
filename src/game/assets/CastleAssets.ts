@@ -132,10 +132,23 @@ export class CastleAssets {
             interiorGroup.add(mesh);
             this.registerStaticWithGroup(mesh, interiorGroup);
 
-            // Exit gate logic on the south wall (z: 60)
-            if (i === 1) {
+            // Determine if this wall should have the exit gate
+            let isExitWall = false;
+            if (name === 'NORTH_CASTLE' && i === 1) isExitWall = true; // South wall
+            if (name === 'SOUTH_CASTLE' && i === 0) isExitWall = true; // North wall
+            if (name === 'EAST_CASTLE' && i === 2) isExitWall = true;  // West wall
+            if (name === 'WEST_CASTLE' && i === 3) isExitWall = true;  // East wall
+
+            if (isExitWall) {
                 const exitGroup = new THREE.Group();
-                exitGroup.position.set(x, 0, z + w.oz - 2);
+                
+                // Position and rotate exit group based on wall
+                if (i === 0 || i === 1) { // North or South walls (horizontal)
+                    exitGroup.position.set(x, 0, z + w.oz + (i === 0 ? 2 : -2));
+                } else { // West or East walls (vertical)
+                    exitGroup.position.set(x + w.ox + (i === 2 ? 2 : -4), 0, z);
+                    exitGroup.rotation.y = Math.PI / 2;
+                }
                 
                 // Double Doors Look
                 const doorMat = new THREE.MeshPhongMaterial({ color: 0x442211, emissive: 0x221100, emissiveIntensity: 0.5 });
@@ -153,7 +166,7 @@ export class CastleAssets {
                 exitGroup.userData = { isExit: true, fromCastle: name };
                 
                 const exitLight = new THREE.PointLight(color, 5, 20);
-                exitLight.position.set(0, 6, -5);
+                exitLight.position.set(0, 6, (i === 0 ? 5 : -5));
                 exitGroup.add(exitLight);
                 
                 interiorGroup.add(exitGroup);

@@ -11,12 +11,12 @@ export class BoundarySystem {
         const outerLimit = 330; 
         const pos = player.mesh.position;
 
-        // Interior Halls
+        // Interior Halls - Clamp movement to room dimensions
         if (Math.abs(pos.x) > 1000) {
             const center = new THREE.Vector3(Math.round(pos.x / 1000) * 1000, 0, Math.round(pos.z / 1000) * 1000);
             _diff.subVectors(pos, center);
-            if (Math.abs(_diff.x) > 35) pos.x = center.x + Math.sign(_diff.x) * 35;
-            if (Math.abs(_diff.z) > 55) pos.z = center.z + Math.sign(_diff.z) * 55;
+            if (Math.abs(_diff.x) > 39) pos.x = center.x + Math.sign(_diff.x) * 39;
+            if (Math.abs(_diff.z) > 59) pos.z = center.z + Math.sign(_diff.z) * 59;
             return;
         }
 

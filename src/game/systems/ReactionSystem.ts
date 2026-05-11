@@ -61,11 +61,11 @@ export class ReactionSystem {
                         
                         state.activeInterior = state.currentZone;
 
-                        // Teleport player to the interior map location
-                        if (type === 'N') player.mesh.position.set(5000, 2, -4950);
-                        else if (type === 'S') player.mesh.position.set(5000, 2, 5050);
-                        else if (type === 'W') player.mesh.position.set(-8000 + 10, 2, 50 + 10);
-                        else if (type === 'E') player.mesh.position.set(8000 + 10, 2, 50 + 10);
+                        // Teleport player to the interior map location near the entrance gate
+                        if (type === 'N') player.mesh.position.set(5000, 2, -5000 + 55); // Near South gate
+                        else if (type === 'S') player.mesh.position.set(5000, 2, 5000 - 55); // Near North gate
+                        else if (type === 'W') player.mesh.position.set(-8000 + 35, 2, 0); // Near East gate
+                        else if (type === 'E') player.mesh.position.set(8000 - 35, 2, 0);  // Near West gate (Silver)
                         Audio.playPhase();
                     } else {
                         state.message = `YOU NEED THE ${reqKey.replace('KEY_', '')} KEY`;
